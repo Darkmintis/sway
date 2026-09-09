@@ -5,28 +5,25 @@ import 'profile_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final SwayTranslations t;
-  final Locale locale;
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
 
   const HomeScreen({
     super.key,
-    required this.t,
-    required this.locale,
     required this.tabIndex,
     required this.onTabChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return Scaffold(
       body: IndexedStack(
         index: tabIndex,
-        children: [
-          _HomeTab(t: t),
-          SettingsScreen(t: t, locale: locale),
-          ProfileScreen(t: t),
+        children: const [
+          _HomeTab(),
+          SettingsScreen(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -55,9 +52,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeTab extends StatefulWidget {
-  final SwayTranslations t;
-
-  const _HomeTab({required this.t});
+  const _HomeTab();
 
   @override
   State<_HomeTab> createState() => _HomeTabState();
@@ -68,7 +63,7 @@ class _HomeTabState extends State<_HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final t = widget.t;
+    final t = context.t;
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(t.app.title)),
@@ -121,9 +116,8 @@ class _HomeTabState extends State<_HomeTab> {
                 ),
               ),
               IconButton.filledTonal(
-                onPressed: _itemCount < 20
-                    ? () => setState(() => _itemCount++)
-                    : null,
+                onPressed:
+                    _itemCount < 20 ? () => setState(() => _itemCount++) : null,
                 icon: const Icon(Icons.add),
               ),
             ],

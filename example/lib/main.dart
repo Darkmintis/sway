@@ -20,12 +20,11 @@ class ExampleApp extends StatefulWidget {
 class ExampleAppState extends State<ExampleApp> {
   late final SwayFormatAdapter adapter;
   Locale _locale = const Locale('en');
+
   /// Kept above [ForceRebuildScope] so locale switches don't reset the tab.
   int tabIndex = 0;
 
   Locale get locale => _locale;
-
-  SwayTranslations get t => SwayTranslations.of(_locale);
 
   @override
   void initState() {
@@ -39,8 +38,9 @@ class ExampleAppState extends State<ExampleApp> {
 
   @override
   Widget build(BuildContext context) {
+    final translations = SwayTranslations.forLocale(_locale);
     return MaterialApp(
-      title: t.app.title,
+      title: translations.app.title,
       debugShowCheckedModeBanner: false,
       locale: _locale,
       supportedLocales: SwayTranslations.supportedLocales,
@@ -54,13 +54,14 @@ class ExampleAppState extends State<ExampleApp> {
         useMaterial3: true,
         brightness: Brightness.light,
       ),
-      home: SwayOverlay(
-        adapter: adapter,
-        child: HomeScreen(
-          t: t,
-          locale: _locale,
-          tabIndex: tabIndex,
-          onTabChanged: (i) => setState(() => tabIndex = i),
+      home: SwayScope(
+        translations: translations,
+        child: SwayOverlay(
+          adapter: adapter,
+          child: HomeScreen(
+            tabIndex: tabIndex,
+            onTabChanged: (i) => setState(() => tabIndex = i),
+          ),
         ),
       ),
     );

@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import '../i18n/sway.g.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final SwayTranslations t;
-
-  const ProfileScreen({super.key, required this.t});
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(t.profile.title)),

@@ -5,13 +5,12 @@ import '../i18n/sway.g.dart';
 import '../main.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final SwayTranslations t;
-  final Locale locale;
-
-  const SettingsScreen({super.key, required this.t, required this.locale});
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
+    final locale = Localizations.localeOf(context);
     final meta = SwayLocaleMeta.fromLanguageCode(locale.languageCode);
     return Scaffold(
       appBar: AppBar(title: Text(t.settings.title)),
@@ -53,11 +52,13 @@ class SettingsScreen extends StatelessWidget {
   void _showLanguagePicker(BuildContext context) {
     final state = context.findAncestorStateOfType<ExampleAppState>();
     if (state == null) return;
+    final t = context.t;
+    final current = Localizations.localeOf(context).languageCode;
 
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (context) {
+      builder: (sheetContext) {
         return SafeArea(
           child: ListView(
             shrinkWrap: true,
@@ -66,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Text(
                   t.settings.language,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
                 ),
               ),
               for (final locale in SwayTranslations.supportedLocales)
@@ -76,15 +77,15 @@ class SettingsScreen extends StatelessWidget {
                         .displayName,
                   ),
                   subtitle: Text(locale.languageCode),
-                  trailing: locale.languageCode == this.locale.languageCode
+                  trailing: locale.languageCode == current
                       ? Icon(
                           Icons.check_circle,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(sheetContext).colorScheme.primary,
                         )
                       : null,
                   onTap: () {
                     state.adapter.setLocale(locale);
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
                 ),
             ],
