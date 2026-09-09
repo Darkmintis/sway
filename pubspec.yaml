@@ -1,9 +1,8 @@
-name: basepackage
+name: sway
 description: >-
-  Private Darkmintis Flutter package template — package, example, tests, and
-  pub.dev-ready CI. Clone and rename to start a new open-source package.
+  Type-safe Flutter localization with an instant in-app locale switcher and
+  zero-friction migration from ARB, easy_localization, and slang.
 version: 0.1.0
-publish_to: none
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -12,6 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:

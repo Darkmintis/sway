@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="branding/app_logo.png" alt="Darkmintis" width="120" />
+  <img src="branding/app_logo.png" alt="Sway" width="120" />
 </p>
 
-<h1 align="center">BasePackage Flutter</h1>
+<h1 align="center">Sway</h1>
 
 <p align="center">
-  Darkmintis Flutter pub.dev package template (v0.1.0). Package + example + CI + tag-based publish.
+  The localization layer for Flutter — simple to author, instant to test, painless to migrate into.
 </p>
 
 <p align="center">
@@ -20,53 +20,64 @@
   </table>
 </p>
 
-[![pub package](https://img.shields.io/pub/v/basepackage.svg)](https://pub.dev/packages/basepackage)
+[![pub package](https://img.shields.io/pub/v/sway.svg)](https://pub.dev/packages/sway)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Private Darkmintis template for bootstrapping new Flutter pub.dev packages.
+Type-safe Flutter localization with an instant in-app locale switcher and zero-friction migration from ARB, easy_localization, and slang.
 
-## What this gives you
+## Features
 
-- Package + example + test structure
-- CI checks (format, analyze, test, pana score)
-- Tag-based GitHub Release workflow
-- Tag-based pub.dev publish workflow
-- Example Android config with `compileSdk = 36` and `targetSdk = 36`
+- **Format + Codegen** — write plain JSON per locale, get type-safe Dart accessors
+- **Overlay** — floating debug widget to switch locale and force RTL/LTR preview instantly
+- **Migration CLI** — one-shot conversion from ARB, easy_localization, or slang formats
+- CLDR plural rules, RTL table, cross-locale validation
 
-## Quick start
+## Quickstart
 
-1. Clone this repo
-2. Rename package in `pubspec.yaml` and remove `publish_to: none`
-3. Replace `lib/` with your real package API
-4. Update `example/` and `test/`
-5. Push to public GitHub and enable automated publishing on pub.dev
-6. Release with:
+```dart
+// 1. Create locale files: lib/i18n/en.sway.json, lib/i18n/ar.sway.json
+// 2. Generate code:
+//    dart run sway:codegen
+// 3. Use in your app:
+import 'package:sway/sway.dart';
 
-```bash
-git tag v0.1.0
-git push origin v0.1.0
+// Generated output gives you:
+// Text(t.home.welcome(name: 'Dipesh'));
+// Text(t.home.itemCount(count: cartItems.length));
 ```
 
-## Run locally
+## Locale File Format
 
-- Use `.vscode/launch.json` to run the example app
-- Run tests:
+```json
+{
+  "home": {
+    "title": "Home",
+    "welcome": "Welcome, {name}!",
+    "itemCount": {
+      "one": "{count} item",
+      "other": "{count} items"
+    }
+  }
+}
+```
+
+## Commands
+
+```bash
+# Generate Dart code from .sway.json files
+dart run sway:codegen
+
+# Migrate from other formats
+dart run sway:migrate --from arb --input lib/l10n
+dart run sway:migrate --from easy_localization --input lib/translations
+dart run sway:migrate --from slang --input lib/i18n
+```
+
+## Testing
 
 ```bash
 flutter test
-cd example && flutter test
 ```
-
-## Branding
-
-Lighter than BaseApp — packages only need logo + screenshots:
-
-| File | Purpose |
-|---|---|
-| `app_logo.png` | Darkmintis mark — README header |
-| `ss1.png` … `ss5.png` | Example / pub.dev screenshots (sample placeholders; replace per package) |
-
-No feature graphic or store frames — those are for Play Store apps, not pub.dev packages.
 
 ## License
 
