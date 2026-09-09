@@ -1,19 +1,28 @@
 /// Sway — The localization layer for Flutter.
 ///
-/// Simple to author, instant to test, painless to migrate into.
+/// # Features
+///
+/// - **Format + codegen** — author nested JSON per locale, generate type-safe
+///   Dart (`context.t.home.welcome(name: …)`). Run `dart run sway:codegen`.
+/// - **Overlay** — debug floating bubble to switch locale / force RTL without
+///   changing device settings. Works with Sway **or** ARB / easy_localization /
+///   slang via adapters.
+/// - **Migrate CLI** — convert ARB, easy_localization, or slang into Sway JSON.
+///
+/// # Quick links
+///
+/// - Full integration: see the package README and `doc/INTEGRATION.md`
+/// - Overlay-only (keep ARB): see `doc/OVERLAY_ONLY.md`
+/// - Migration: see `doc/MIGRATION.md`
+///
+/// Tooling APIs that touch the filesystem live in `package:sway/codegen.dart`
+/// (CLI / VM only — not needed in your Flutter app import).
 library;
 
-// Format module
-export 'src/format/locale_file.dart';
+// Runtime-safe format helpers (no dart:io)
 export 'src/format/exceptions.dart';
-export 'src/format/validator.dart';
 export 'src/format/plural_rules.dart';
 export 'src/format/rtl_table.dart';
-
-// Codegen helpers (used by `dart run sway:codegen` and advanced tooling)
-export 'src/codegen/config.dart';
-export 'src/codegen/emitter.dart';
-export 'src/codegen/schema_diff.dart';
 
 // Shared module
 export 'src/shared/locale_meta.dart';
