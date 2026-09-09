@@ -1,23 +1,28 @@
 # Sway example
 
-Demo app for the [sway](https://pub.dev/packages/sway) localization package.
+Runnable demo for the [sway](https://pub.dev/packages/sway) package.
 
-Shows nested type-safe translations, CLDR plurals, RTL (Arabic + Hebrew), and the
-draggable debug overlay.
+## Features shown
+
+- Nested type-safe strings via `context.t`
+- CLDR plurals with a live count slider
+- Six locales: `en`, `ar`, `es`, `de`, `ja`, `he`
+- RTL (Arabic + Hebrew)
+- Draggable overlay with Force RTL/LTR
+- Tab index preserved across locale changes
 
 ## Run
 
-```bash
-# From the package root — regenerate if you edit *.sway.json
-# Writes sway.g.dart + sway_en.g.dart, sway_ar.g.dart, …
-dart run sway:codegen --config example/lib/i18n/sway.config.json
+From the **package root**:
 
+```bash
+dart run sway:codegen --config example/lib/i18n/sway.config.json
 cd example
 flutter run
 ```
 
-## Locales
+## Tips
 
-`en`, `ar`, `es`, `de`, `ja`, `he`
-
-Use the floating button to switch locales or force RTL/LTR preview.
+- Drag the floating button; tap to open locales.
+- Change language in **Settings** or via the overlay — both stay in sync.
+- Hot **reload** keeps the forced locale; hot **restart** resets it.
