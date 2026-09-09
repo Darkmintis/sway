@@ -9,13 +9,14 @@ class SwayAppTranslationsAr extends SwayAppTranslations {
   const SwayAppTranslationsAr();
 
   @override
+
   /// `سواي`
   String get title => 'سواي';
 
   @override
+
   /// `الترجمة لفلاتر`
   String get subtitle => 'الترجمة لفلاتر';
-
 }
 
 /// ar translations for `home`.
@@ -24,45 +25,62 @@ class SwayHomeTranslationsAr extends SwayHomeTranslations {
   const SwayHomeTranslationsAr();
 
   @override
+
   /// `أهلاً، {name}!`
   String welcome({required String name}) => 'أهلاً، $name!';
 
   @override
+
   /// `اكتب JSON واحصل على Dart آمن بالأنواع، وبدّل اللغة فورًا عبر الزر العائم.`
-  String get description => 'اكتب JSON واحصل على Dart آمن بالأنواع، وبدّل اللغة فورًا عبر الزر العائم.';
+  String get description =>
+      'اكتب JSON واحصل على Dart آمن بالأنواع، وبدّل اللغة فورًا عبر الزر العائم.';
 
   @override
+
   /// `اسحب الزر العائم ثم اضغط لتبديل اللغة أو فرض RTL.`
   String get overlayHint => 'اسحب الزر العائم ثم اضغط لتبديل اللغة أو فرض RTL.';
 
   @override
+
   /// Pluralized `itemCount`.
   String itemCount({required num count}) {
     final category = resolvePlural('ar', count);
     switch (category) {
-      case PluralCategory.zero: return 'لا عناصر';
-      case PluralCategory.one: return 'عنصر واحد';
-      case PluralCategory.two: return 'عنصران';
-      case PluralCategory.few: return '$count عناصر';
-      case PluralCategory.many: return '$count عنصرًا';
-      case PluralCategory.other: return '$count عنصر';
+      case PluralCategory.zero:
+        return 'لا عناصر';
+      case PluralCategory.one:
+        return 'عنصر واحد';
+      case PluralCategory.two:
+        return 'عنصران';
+      case PluralCategory.few:
+        return '$count عناصر';
+      case PluralCategory.many:
+        return '$count عنصرًا';
+      case PluralCategory.other:
+        return '$count عنصر';
     }
   }
 
   @override
+
   /// Pluralized `messageCount`.
   String messageCount({required num count}) {
     final category = resolvePlural('ar', count);
     switch (category) {
-      case PluralCategory.zero: return 'لا رسائل';
-      case PluralCategory.one: return 'رسالة واحدة';
-      case PluralCategory.two: return 'رسالتان';
-      case PluralCategory.few: return '$count رسائل';
-      case PluralCategory.many: return '$count رسالة';
-      case PluralCategory.other: return '$count رسالة';
+      case PluralCategory.zero:
+        return 'لا رسائل';
+      case PluralCategory.one:
+        return 'رسالة واحدة';
+      case PluralCategory.two:
+        return 'رسالتان';
+      case PluralCategory.few:
+        return '$count رسائل';
+      case PluralCategory.many:
+        return '$count رسالة';
+      case PluralCategory.other:
+        return '$count رسالة';
     }
   }
-
 }
 
 /// ar translations for `settings`.
@@ -71,33 +89,39 @@ class SwaySettingsTranslationsAr extends SwaySettingsTranslations {
   const SwaySettingsTranslationsAr();
 
   @override
+
   /// `الإعدادات`
   String get title => 'الإعدادات';
 
   @override
+
   /// `اللغة`
   String get language => 'اللغة';
 
   @override
+
   /// `الوضع الداكن`
   String get darkMode => 'الوضع الداكن';
 
   @override
+
   /// `الإشعارات`
   String get notifications => 'الإشعارات';
 
   @override
+
   /// `تسجيل الخروج`
   String get logout => 'تسجيل الخروج';
 
   @override
+
   /// `إيقاف`
   String get off => 'إيقاف';
 
   @override
+
   /// `تشغيل`
   String get on => 'تشغيل';
-
 }
 
 /// ar translations for `profile`.
@@ -106,25 +130,29 @@ class SwayProfileTranslationsAr extends SwayProfileTranslations {
   const SwayProfileTranslationsAr();
 
   @override
+
   /// `الملف الشخصي`
   String get title => 'الملف الشخصي';
 
   @override
+
   /// `تعديل الملف الشخصي`
   String get editProfile => 'تعديل الملف الشخصي';
 
   @override
+
   /// `الاسم`
   String get name => 'الاسم';
 
   @override
+
   /// `البريد الإلكتروني`
   String get email => 'البريد الإلكتروني';
 
   @override
+
   /// `عضو منذ {date}`
   String memberSince({required String date}) => 'عضو منذ $date';
-
 }
 
 /// ar translations for `common`.
@@ -133,33 +161,39 @@ class SwayCommonTranslationsAr extends SwayCommonTranslations {
   const SwayCommonTranslationsAr();
 
   @override
+
   /// `موافق`
   String get ok => 'موافق';
 
   @override
+
   /// `إلغاء`
   String get cancel => 'إلغاء';
 
   @override
+
   /// `حفظ`
   String get save => 'حفظ';
 
   @override
+
   /// `حذف`
   String get delete => 'حذف';
 
   @override
+
   /// `جاري التحميل...`
   String get loading => 'جاري التحميل...';
 
   @override
+
   /// `حدث خطأ ما`
   String get error => 'حدث خطأ ما';
 
   @override
+
   /// `إعادة المحاولة`
   String get retry => 'إعادة المحاولة';
-
 }
 
 /// Sway translations for locale: ar
@@ -187,6 +221,4 @@ class SwayTranslationsAr extends SwayTranslations {
 
   @override
   SwayCommonTranslationsAr get common => const SwayCommonTranslationsAr();
-
 }
-

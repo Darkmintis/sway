@@ -9,13 +9,14 @@ class SwayAppTranslationsEn extends SwayAppTranslations {
   const SwayAppTranslationsEn();
 
   @override
+
   /// `Sway`
   String get title => 'Sway';
 
   @override
+
   /// `Localization for Flutter`
   String get subtitle => 'Localization for Flutter';
-
 }
 
 /// en translations for `home`.
@@ -24,39 +25,51 @@ class SwayHomeTranslationsEn extends SwayHomeTranslations {
   const SwayHomeTranslationsEn();
 
   @override
+
   /// `Welcome, {name}!`
   String welcome({required String name}) => 'Welcome, $name!';
 
   @override
+
   /// `Write JSON, get type-safe Dart, and switch locales instantly with the floating button.`
-  String get description => 'Write JSON, get type-safe Dart, and switch locales instantly with the floating button.';
+  String get description =>
+      'Write JSON, get type-safe Dart, and switch locales instantly with the floating button.';
 
   @override
+
   /// `Drag the floating button, then tap to switch language or force RTL.`
-  String get overlayHint => 'Drag the floating button, then tap to switch language or force RTL.';
+  String get overlayHint =>
+      'Drag the floating button, then tap to switch language or force RTL.';
 
   @override
+
   /// Pluralized `itemCount`.
   String itemCount({required num count}) {
     final category = resolvePlural('en', count);
     switch (category) {
-      case PluralCategory.one: return '$count item';
-      case PluralCategory.other: return '$count items';
-      default: return '$count items';
+      case PluralCategory.one:
+        return '$count item';
+      case PluralCategory.other:
+        return '$count items';
+      default:
+        return '$count items';
     }
   }
 
   @override
+
   /// Pluralized `messageCount`.
   String messageCount({required num count}) {
     final category = resolvePlural('en', count);
     switch (category) {
-      case PluralCategory.one: return '$count message';
-      case PluralCategory.other: return '$count messages';
-      default: return '$count messages';
+      case PluralCategory.one:
+        return '$count message';
+      case PluralCategory.other:
+        return '$count messages';
+      default:
+        return '$count messages';
     }
   }
-
 }
 
 /// en translations for `settings`.
@@ -65,33 +78,39 @@ class SwaySettingsTranslationsEn extends SwaySettingsTranslations {
   const SwaySettingsTranslationsEn();
 
   @override
+
   /// `Settings`
   String get title => 'Settings';
 
   @override
+
   /// `Language`
   String get language => 'Language';
 
   @override
+
   /// `Dark Mode`
   String get darkMode => 'Dark Mode';
 
   @override
+
   /// `Notifications`
   String get notifications => 'Notifications';
 
   @override
+
   /// `Log out`
   String get logout => 'Log out';
 
   @override
+
   /// `Off`
   String get off => 'Off';
 
   @override
+
   /// `On`
   String get on => 'On';
-
 }
 
 /// en translations for `profile`.
@@ -100,25 +119,29 @@ class SwayProfileTranslationsEn extends SwayProfileTranslations {
   const SwayProfileTranslationsEn();
 
   @override
+
   /// `Profile`
   String get title => 'Profile';
 
   @override
+
   /// `Edit Profile`
   String get editProfile => 'Edit Profile';
 
   @override
+
   /// `Name`
   String get name => 'Name';
 
   @override
+
   /// `Email`
   String get email => 'Email';
 
   @override
+
   /// `Member since {date}`
   String memberSince({required String date}) => 'Member since $date';
-
 }
 
 /// en translations for `common`.
@@ -127,33 +150,39 @@ class SwayCommonTranslationsEn extends SwayCommonTranslations {
   const SwayCommonTranslationsEn();
 
   @override
+
   /// `OK`
   String get ok => 'OK';
 
   @override
+
   /// `Cancel`
   String get cancel => 'Cancel';
 
   @override
+
   /// `Save`
   String get save => 'Save';
 
   @override
+
   /// `Delete`
   String get delete => 'Delete';
 
   @override
+
   /// `Loading...`
   String get loading => 'Loading...';
 
   @override
+
   /// `Something went wrong`
   String get error => 'Something went wrong';
 
   @override
+
   /// `Try again`
   String get retry => 'Try again';
-
 }
 
 /// Sway translations for locale: en
@@ -181,6 +210,4 @@ class SwayTranslationsEn extends SwayTranslations {
 
   @override
   SwayCommonTranslationsEn get common => const SwayCommonTranslationsEn();
-
 }
-

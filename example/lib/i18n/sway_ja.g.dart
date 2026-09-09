@@ -9,13 +9,14 @@ class SwayAppTranslationsJa extends SwayAppTranslations {
   const SwayAppTranslationsJa();
 
   @override
+
   /// `Sway`
   String get title => 'Sway';
 
   @override
+
   /// `Flutterのローカライズ`
   String get subtitle => 'Flutterのローカライズ';
-
 }
 
 /// ja translations for `home`.
@@ -24,37 +25,45 @@ class SwayHomeTranslationsJa extends SwayHomeTranslations {
   const SwayHomeTranslationsJa();
 
   @override
+
   /// `ようこそ、{name}さん！`
   String welcome({required String name}) => 'ようこそ、$nameさん！';
 
   @override
+
   /// `JSONを書いて型安全なDartを生成。フローティングボタンですぐに言語を切り替えられます。`
   String get description => 'JSONを書いて型安全なDartを生成。フローティングボタンですぐに言語を切り替えられます。';
 
   @override
+
   /// `フローティングボタンをドラッグし、タップして言語切替やRTL強制ができます。`
   String get overlayHint => 'フローティングボタンをドラッグし、タップして言語切替やRTL強制ができます。';
 
   @override
+
   /// Pluralized `itemCount`.
   String itemCount({required num count}) {
     final category = resolvePlural('ja', count);
     switch (category) {
-      case PluralCategory.other: return '$count 件';
-      default: return '$count 件';
+      case PluralCategory.other:
+        return '$count 件';
+      default:
+        return '$count 件';
     }
   }
 
   @override
+
   /// Pluralized `messageCount`.
   String messageCount({required num count}) {
     final category = resolvePlural('ja', count);
     switch (category) {
-      case PluralCategory.other: return '$count 件のメッセージ';
-      default: return '$count 件のメッセージ';
+      case PluralCategory.other:
+        return '$count 件のメッセージ';
+      default:
+        return '$count 件のメッセージ';
     }
   }
-
 }
 
 /// ja translations for `settings`.
@@ -63,33 +72,39 @@ class SwaySettingsTranslationsJa extends SwaySettingsTranslations {
   const SwaySettingsTranslationsJa();
 
   @override
+
   /// `設定`
   String get title => '設定';
 
   @override
+
   /// `言語`
   String get language => '言語';
 
   @override
+
   /// `ダークモード`
   String get darkMode => 'ダークモード';
 
   @override
+
   /// `通知`
   String get notifications => '通知';
 
   @override
+
   /// `ログアウト`
   String get logout => 'ログアウト';
 
   @override
+
   /// `オフ`
   String get off => 'オフ';
 
   @override
+
   /// `オン`
   String get on => 'オン';
-
 }
 
 /// ja translations for `profile`.
@@ -98,25 +113,29 @@ class SwayProfileTranslationsJa extends SwayProfileTranslations {
   const SwayProfileTranslationsJa();
 
   @override
+
   /// `プロフィール`
   String get title => 'プロフィール';
 
   @override
+
   /// `プロフィールを編集`
   String get editProfile => 'プロフィールを編集';
 
   @override
+
   /// `名前`
   String get name => '名前';
 
   @override
+
   /// `メール`
   String get email => 'メール';
 
   @override
+
   /// `{date}からメンバー`
   String memberSince({required String date}) => '$dateからメンバー';
-
 }
 
 /// ja translations for `common`.
@@ -125,33 +144,39 @@ class SwayCommonTranslationsJa extends SwayCommonTranslations {
   const SwayCommonTranslationsJa();
 
   @override
+
   /// `OK`
   String get ok => 'OK';
 
   @override
+
   /// `キャンセル`
   String get cancel => 'キャンセル';
 
   @override
+
   /// `保存`
   String get save => '保存';
 
   @override
+
   /// `削除`
   String get delete => '削除';
 
   @override
+
   /// `読み込み中...`
   String get loading => '読み込み中...';
 
   @override
+
   /// `問題が発生しました`
   String get error => '問題が発生しました';
 
   @override
+
   /// `再試行`
   String get retry => '再試行';
-
 }
 
 /// Sway translations for locale: ja
@@ -179,6 +204,4 @@ class SwayTranslationsJa extends SwayTranslations {
 
   @override
   SwayCommonTranslationsJa get common => const SwayCommonTranslationsJa();
-
 }
-

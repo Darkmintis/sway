@@ -21,7 +21,6 @@ abstract class SwayAppTranslations {
 
   /// `Localization for Flutter`
   String get subtitle;
-
 }
 
 /// Generated translations for `home`.
@@ -43,7 +42,6 @@ abstract class SwayHomeTranslations {
 
   /// Pluralized `messageCount`.
   String messageCount({required num count});
-
 }
 
 /// Generated translations for `settings`.
@@ -71,7 +69,6 @@ abstract class SwaySettingsTranslations {
 
   /// `On`
   String get on;
-
 }
 
 /// Generated translations for `profile`.
@@ -93,7 +90,6 @@ abstract class SwayProfileTranslations {
 
   /// `Member since {date}`
   String memberSince({required String date});
-
 }
 
 /// Generated translations for `common`.
@@ -121,7 +117,6 @@ abstract class SwayCommonTranslations {
 
   /// `Try again`
   String get retry;
-
 }
 
 /// Root generated translations interface.
@@ -178,16 +173,72 @@ abstract class SwayTranslations {
     Locale('ja'),
   ];
 
-  /// Returns translations for [locale], falling back to `en`.
-  static SwayTranslations of(Locale locale) {
+  /// Longhand: translations for [locale], falling back to `en`.
+  static SwayTranslations forLocale(Locale locale) {
     switch (locale.languageCode) {
-      case 'ar': return ar;
-      case 'de': return de;
-      case 'en': return en;
-      case 'es': return es;
-      case 'he': return he;
-      case 'ja': return ja;
-      default: return en;
+      case 'ar':
+        return ar;
+      case 'de':
+        return de;
+      case 'en':
+        return en;
+      case 'es':
+        return es;
+      case 'he':
+        return he;
+      case 'ja':
+        return ja;
+      default:
+        return en;
     }
   }
+
+  /// Flutter-style lookup from the nearest [SwayScope].
+  ///
+  /// Prefer shorthand: `context.t.home.welcome(name: …)`.
+  static SwayTranslations of(BuildContext context) => SwayScope.of(context);
+}
+
+/// Provides [SwayTranslations] to descendants (like `Localizations`).
+class SwayScope extends InheritedWidget {
+  /// Active translations for this subtree.
+  final SwayTranslations translations;
+
+  /// Creates a [SwayScope].
+  const SwayScope({
+    super.key,
+    required this.translations,
+    required super.child,
+  });
+
+  /// Looks up translations from [context].
+  static SwayTranslations of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<SwayScope>();
+    assert(
+      scope != null,
+      'No SwayScope found. Wrap your app with SwayScope(translations: SwayTranslations.forLocale(locale), child: …).',
+    );
+    return scope!.translations;
+  }
+
+  /// Same as [of], but returns null if missing.
+  static SwayTranslations? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<SwayScope>()
+        ?.translations;
+  }
+
+  @override
+  bool updateShouldNotify(SwayScope oldWidget) =>
+      translations.locale != oldWidget.translations.locale ||
+      !identical(translations, oldWidget.translations);
+}
+
+/// Shorthand accessors for generated translations.
+extension SwayTranslationsX on BuildContext {
+  /// Shorthand: `context.t.home.welcome(name: 'Dipesh')`.
+  SwayTranslations get t => SwayTranslations.of(this);
+
+  /// Longhand alias of [t].
+  SwayTranslations get sway => SwayTranslations.of(this);
 }

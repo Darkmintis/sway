@@ -9,13 +9,14 @@ class SwayAppTranslationsHe extends SwayAppTranslations {
   const SwayAppTranslationsHe();
 
   @override
+
   /// `Sway`
   String get title => 'Sway';
 
   @override
+
   /// `לוקליזציה ל-Flutter`
   String get subtitle => 'לוקליזציה ל-Flutter';
-
 }
 
 /// he translations for `home`.
@@ -24,41 +25,55 @@ class SwayHomeTranslationsHe extends SwayHomeTranslations {
   const SwayHomeTranslationsHe();
 
   @override
+
   /// `ברוך הבא, {name}!`
   String welcome({required String name}) => 'ברוך הבא, $name!';
 
   @override
+
   /// `כתבו JSON, קבלו Dart בטוח טיפוסים, והחליפו שפה מיד עם הכפתור הצף.`
-  String get description => 'כתבו JSON, קבלו Dart בטוח טיפוסים, והחליפו שפה מיד עם הכפתור הצף.';
+  String get description =>
+      'כתבו JSON, קבלו Dart בטוח טיפוסים, והחליפו שפה מיד עם הכפתור הצף.';
 
   @override
+
   /// `גררו את הכפתור הצף ולחצו כדי להחליף שפה או לכפות RTL.`
-  String get overlayHint => 'גררו את הכפתור הצף ולחצו כדי להחליף שפה או לכפות RTL.';
+  String get overlayHint =>
+      'גררו את הכפתור הצף ולחצו כדי להחליף שפה או לכפות RTL.';
 
   @override
+
   /// Pluralized `itemCount`.
   String itemCount({required num count}) {
     final category = resolvePlural('he', count);
     switch (category) {
-      case PluralCategory.one: return 'פריט אחד';
-      case PluralCategory.two: return 'שני פריטים';
-      case PluralCategory.other: return '$count פריטים';
-      default: return '$count פריטים';
+      case PluralCategory.one:
+        return 'פריט אחד';
+      case PluralCategory.two:
+        return 'שני פריטים';
+      case PluralCategory.other:
+        return '$count פריטים';
+      default:
+        return '$count פריטים';
     }
   }
 
   @override
+
   /// Pluralized `messageCount`.
   String messageCount({required num count}) {
     final category = resolvePlural('he', count);
     switch (category) {
-      case PluralCategory.one: return 'הודעה אחת';
-      case PluralCategory.two: return 'שתי הודעות';
-      case PluralCategory.other: return '$count הודעות';
-      default: return '$count הודעות';
+      case PluralCategory.one:
+        return 'הודעה אחת';
+      case PluralCategory.two:
+        return 'שתי הודעות';
+      case PluralCategory.other:
+        return '$count הודעות';
+      default:
+        return '$count הודעות';
     }
   }
-
 }
 
 /// he translations for `settings`.
@@ -67,33 +82,39 @@ class SwaySettingsTranslationsHe extends SwaySettingsTranslations {
   const SwaySettingsTranslationsHe();
 
   @override
+
   /// `הגדרות`
   String get title => 'הגדרות';
 
   @override
+
   /// `שפה`
   String get language => 'שפה';
 
   @override
+
   /// `מצב כהה`
   String get darkMode => 'מצב כהה';
 
   @override
+
   /// `התראות`
   String get notifications => 'התראות';
 
   @override
+
   /// `התנתקות`
   String get logout => 'התנתקות';
 
   @override
+
   /// `כבוי`
   String get off => 'כבוי';
 
   @override
+
   /// `פועל`
   String get on => 'פועל';
-
 }
 
 /// he translations for `profile`.
@@ -102,25 +123,29 @@ class SwayProfileTranslationsHe extends SwayProfileTranslations {
   const SwayProfileTranslationsHe();
 
   @override
+
   /// `פרופיל`
   String get title => 'פרופיל';
 
   @override
+
   /// `עריכת פרופיל`
   String get editProfile => 'עריכת פרופיל';
 
   @override
+
   /// `שם`
   String get name => 'שם';
 
   @override
+
   /// `אימייל`
   String get email => 'אימייל';
 
   @override
+
   /// `חבר מאז {date}`
   String memberSince({required String date}) => 'חבר מאז $date';
-
 }
 
 /// he translations for `common`.
@@ -129,33 +154,39 @@ class SwayCommonTranslationsHe extends SwayCommonTranslations {
   const SwayCommonTranslationsHe();
 
   @override
+
   /// `אישור`
   String get ok => 'אישור';
 
   @override
+
   /// `ביטול`
   String get cancel => 'ביטול';
 
   @override
+
   /// `שמירה`
   String get save => 'שמירה';
 
   @override
+
   /// `מחיקה`
   String get delete => 'מחיקה';
 
   @override
+
   /// `טוען...`
   String get loading => 'טוען...';
 
   @override
+
   /// `משהו השתבש`
   String get error => 'משהו השתבש';
 
   @override
+
   /// `נסה שוב`
   String get retry => 'נסה שוב';
-
 }
 
 /// Sway translations for locale: he
@@ -183,6 +214,4 @@ class SwayTranslationsHe extends SwayTranslations {
 
   @override
   SwayCommonTranslationsHe get common => const SwayCommonTranslationsHe();
-
 }
-

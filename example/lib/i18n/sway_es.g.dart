@@ -9,13 +9,14 @@ class SwayAppTranslationsEs extends SwayAppTranslations {
   const SwayAppTranslationsEs();
 
   @override
+
   /// `Sway`
   String get title => 'Sway';
 
   @override
+
   /// `Localización para Flutter`
   String get subtitle => 'Localización para Flutter';
-
 }
 
 /// es translations for `home`.
@@ -24,39 +25,51 @@ class SwayHomeTranslationsEs extends SwayHomeTranslations {
   const SwayHomeTranslationsEs();
 
   @override
+
   /// `¡Bienvenido, {name}!`
   String welcome({required String name}) => '¡Bienvenido, $name!';
 
   @override
+
   /// `Escribe JSON, obtén Dart tipado y cambia el idioma al instante con el botón flotante.`
-  String get description => 'Escribe JSON, obtén Dart tipado y cambia el idioma al instante con el botón flotante.';
+  String get description =>
+      'Escribe JSON, obtén Dart tipado y cambia el idioma al instante con el botón flotante.';
 
   @override
+
   /// `Arrastra el botón flotante y tócalo para cambiar el idioma o forzar RTL.`
-  String get overlayHint => 'Arrastra el botón flotante y tócalo para cambiar el idioma o forzar RTL.';
+  String get overlayHint =>
+      'Arrastra el botón flotante y tócalo para cambiar el idioma o forzar RTL.';
 
   @override
+
   /// Pluralized `itemCount`.
   String itemCount({required num count}) {
     final category = resolvePlural('es', count);
     switch (category) {
-      case PluralCategory.one: return '$count elemento';
-      case PluralCategory.other: return '$count elementos';
-      default: return '$count elementos';
+      case PluralCategory.one:
+        return '$count elemento';
+      case PluralCategory.other:
+        return '$count elementos';
+      default:
+        return '$count elementos';
     }
   }
 
   @override
+
   /// Pluralized `messageCount`.
   String messageCount({required num count}) {
     final category = resolvePlural('es', count);
     switch (category) {
-      case PluralCategory.one: return '$count mensaje';
-      case PluralCategory.other: return '$count mensajes';
-      default: return '$count mensajes';
+      case PluralCategory.one:
+        return '$count mensaje';
+      case PluralCategory.other:
+        return '$count mensajes';
+      default:
+        return '$count mensajes';
     }
   }
-
 }
 
 /// es translations for `settings`.
@@ -65,33 +78,39 @@ class SwaySettingsTranslationsEs extends SwaySettingsTranslations {
   const SwaySettingsTranslationsEs();
 
   @override
+
   /// `Ajustes`
   String get title => 'Ajustes';
 
   @override
+
   /// `Idioma`
   String get language => 'Idioma';
 
   @override
+
   /// `Modo oscuro`
   String get darkMode => 'Modo oscuro';
 
   @override
+
   /// `Notificaciones`
   String get notifications => 'Notificaciones';
 
   @override
+
   /// `Cerrar sesión`
   String get logout => 'Cerrar sesión';
 
   @override
+
   /// `Desactivado`
   String get off => 'Desactivado';
 
   @override
+
   /// `Activado`
   String get on => 'Activado';
-
 }
 
 /// es translations for `profile`.
@@ -100,25 +119,29 @@ class SwayProfileTranslationsEs extends SwayProfileTranslations {
   const SwayProfileTranslationsEs();
 
   @override
+
   /// `Perfil`
   String get title => 'Perfil';
 
   @override
+
   /// `Editar perfil`
   String get editProfile => 'Editar perfil';
 
   @override
+
   /// `Nombre`
   String get name => 'Nombre';
 
   @override
+
   /// `Correo`
   String get email => 'Correo';
 
   @override
+
   /// `Miembro desde {date}`
   String memberSince({required String date}) => 'Miembro desde $date';
-
 }
 
 /// es translations for `common`.
@@ -127,33 +150,39 @@ class SwayCommonTranslationsEs extends SwayCommonTranslations {
   const SwayCommonTranslationsEs();
 
   @override
+
   /// `OK`
   String get ok => 'OK';
 
   @override
+
   /// `Cancelar`
   String get cancel => 'Cancelar';
 
   @override
+
   /// `Guardar`
   String get save => 'Guardar';
 
   @override
+
   /// `Eliminar`
   String get delete => 'Eliminar';
 
   @override
+
   /// `Cargando...`
   String get loading => 'Cargando...';
 
   @override
+
   /// `Algo salió mal`
   String get error => 'Algo salió mal';
 
   @override
+
   /// `Reintentar`
   String get retry => 'Reintentar';
-
 }
 
 /// Sway translations for locale: es
@@ -181,6 +210,4 @@ class SwayTranslationsEs extends SwayTranslations {
 
   @override
   SwayCommonTranslationsEs get common => const SwayCommonTranslationsEs();
-
 }
-
