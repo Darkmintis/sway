@@ -1,0 +1,17 @@
+{
+  "home": {
+    "title": "الرئيسية",
+    "welcome": "أهلاً، {name}!",
+    "itemCount": {
+      "zero": "لا عناصر",
+      "one": "عنصر واحد",
+      "two": "عنصران",
+      "few": "{count} عناصر",
+      "many": "{count} عنصرًا",
+      "other": "{count} عنصر"
+    }
+  },
+  "settings": {
+    "logout": "تسجيل الخروج"
+  }
+}

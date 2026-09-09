@@ -1,0 +1,13 @@
+{
+  "home": {
+    "title": "Home",
+    "welcome": "Welcome, {name}!",
+    "itemCount": {
+      "one": "{count} item",
+      "other": "{count} items"
+    }
+  },
+  "settings": {
+    "logout": "Log out"
+  }
+}
