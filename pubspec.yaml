@@ -6,6 +6,8 @@ version: 0.1.0
 homepage: https://github.com/Darkmintis/sway
 repository: https://github.com/Darkmintis/sway
 issue_tracker: https://github.com/Darkmintis/sway/issues
+documentation: https://github.com/Darkmintis/sway#readme
+
 topics:
   - localization
   - i18n
@@ -13,12 +15,18 @@ topics:
   - translation
   - flutter
 
+screenshots:
+  - description: Example app — switch locales and preview RTL/LTR with the overlay
+    path: branding/demo.gif
+
 environment:
   sdk: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   path: ^1.9.0
 
@@ -32,3 +40,11 @@ executables:
   migrate: migrate
 
 flutter:
+
+platforms:
+  android:
+  ios:
+  web:
+  macos:
+  windows:
+  linux:
