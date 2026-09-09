@@ -1,17 +1,13 @@
 # Sway
 
-**The localization layer for Flutter** — type-safe strings, an in-app locale switcher, and one-command migration from ARB, easy_localization, and slang.
+<img align="right" width="280" src="branding/demo.gif" alt="Sway overlay: switch language and RTL/LTR in the example app" />
 
-<p align="center">
-  <a href="https://pub.dev/packages/sway"><img src="https://img.shields.io/pub/v/sway.svg" alt="pub package" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
-</p>
+Type-safe localization for Flutter apps - write nested translations, get strongly typed Dart, and switch languages (including RTL) in your app.
 
-<p align="center">
-  <img src="branding/demo.gif" alt="Sway overlay: switch language and RTL/LTR in the example app" width="280" />
-</p>
+[![pub package](https://img.shields.io/pub/v/sway.svg)](https://pub.dev/packages/sway)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-<p align="center"><em>Debug overlay — change language and force RTL/LTR without touching device settings.</em></p>
+<br clear="both" />
 
 ## Why Sway?
 
@@ -111,7 +107,7 @@ class HomePage extends StatelessWidget {
 
 Nested keys match your JSON (`profile.editProfile` → `t.profile.editProfile`) so sections with the same leaf name (`title`) never collide.
 
-## Optional config — `lib/i18n/sway.config.json`
+## Optional config - `lib/i18n/sway.config.json`
 
 ```json
 {
@@ -181,8 +177,8 @@ Full guide: [doc/MIGRATION.md](doc/MIGRATION.md)
 | Generate | `flutter gen-l10n` | `dart run sway:codegen` |
 | Output | Main + per-locale parts | Same idea |
 | Lookup | `AppLocalizations.of(context)!.key` | `context.t.section.key` |
-| Debug locale UI | — | Built-in overlay |
-| Migrate from others | — | Built-in CLI |
+| Debug locale UI | - | Built-in overlay |
+| Migrate from others | - | Built-in CLI |
 
 Step-by-step: [doc/INTEGRATION.md](doc/INTEGRATION.md)
 
@@ -216,6 +212,6 @@ Six locales (`en`, `ar`, `es`, `de`, `ja`, `he`), plurals, RTL, and the overlay.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
 
 <p align="center">© Darkmintis</p>
