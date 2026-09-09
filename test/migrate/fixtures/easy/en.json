@@ -1,0 +1,10 @@
+{
+  "home": {
+    "title": "Home",
+    "welcome": "Hello, {}!"
+  },
+  "items": {
+    "one": "{count} item",
+    "other": "{count} items"
+  }
+}

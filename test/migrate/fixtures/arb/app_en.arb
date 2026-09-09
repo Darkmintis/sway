@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "homeTitle": "Home",
+  "welcome": "Hello, {name}!",
+  "@welcome": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": {"type": "num"}
+    }
+  },
+  "gender": "{sex, select, male{he} female{she} other{they}}"
+}

@@ -1,0 +1,10 @@
+{
+  "home": {
+    "title": "Home",
+    "welcome": "Hello, $name!"
+  },
+  "items": {
+    "one": "$count item",
+    "other": "$count items"
+  }
+}

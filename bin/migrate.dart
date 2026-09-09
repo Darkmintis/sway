@@ -9,10 +9,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
-/// Exit code for success.
 const _exitSuccess = 0;
-
-/// Exit code for unrecoverable error.
 const _exitError = 1;
 
 void main(List<String> arguments) {
@@ -37,14 +34,13 @@ void main(List<String> arguments) {
   }
 }
 
-/// Parses command-line arguments.
 _MigrateArgs? _parseArgs(List<String> arguments) {
   String? from;
   String? input;
   String? output;
-  bool dryRun = false;
-  bool force = false;
-  bool nestOnPrefix = false;
+  var dryRun = false;
+  var force = false;
+  var nestOnPrefix = false;
 
   for (var i = 0; i < arguments.length; i++) {
     switch (arguments[i]) {
@@ -72,7 +68,9 @@ _MigrateArgs? _parseArgs(List<String> arguments) {
   }
 
   if (!['arb', 'easy_localization', 'slang'].contains(from)) {
-    stderr.writeln('Error: --from must be one of: arb, easy_localization, slang');
+    stderr.writeln(
+      'Error: --from must be one of: arb, easy_localization, slang',
+    );
     return null;
   }
 
@@ -85,7 +83,9 @@ _MigrateArgs? _parseArgs(List<String> arguments) {
   return _MigrateArgs(
     from: from,
     inputDir: inputDir,
-    outputDir: Directory(output ?? p.join(inputDir.path, '..', 'lib', 'i18n_migrated')),
+    outputDir: Directory(
+      output ?? p.join(inputDir.path, '..', 'i18n_migrated'),
+    ),
     dryRun: dryRun,
     force: force,
     nestOnPrefix: nestOnPrefix,
@@ -96,25 +96,32 @@ void _printUsage() {
   stdout.writeln('Sway Migration CLI');
   stdout.writeln();
   stdout.writeln('Usage:');
-  stdout.writeln('  dart run sway:migrate --from <format> --input <dir> [options]');
+  stdout.writeln(
+    '  dart run sway:migrate --from <format> --input <dir> [options]',
+  );
   stdout.writeln();
   stdout.writeln('Options:');
-  stdout.writeln('  --from <format>        Source format: arb, easy_localization, slang');
+  stdout.writeln(
+    '  --from <format>        Source format: arb, easy_localization, slang',
+  );
   stdout.writeln('  --input <dir>          Directory containing source locale files');
-  stdout.writeln('  --output <dir>         Output directory (default: lib/i18n_migrated)');
+  stdout.writeln(
+    '  --output <dir>         Output directory (default: ../i18n_migrated)',
+  );
   stdout.writeln('  --dry-run              Print summary without writing files');
   stdout.writeln('  --force                Write into non-empty output directory');
-  stdout.writeln('  --nest-on-prefix       Split underscore-separated ARB keys into nesting');
+  stdout.writeln(
+    '  --nest-on-prefix       Split underscore-separated ARB keys into nesting',
+  );
   stdout.writeln('  -h, --help             Show this help');
 }
 
-/// Performs the migration and returns a result.
 _MigrateResult _migrate(_MigrateArgs args) {
   final warnings = <String>[];
   final errors = <String>[];
   final migratedKeys = <String, int>{};
+  final manualKeys = <String>[];
 
-  // Find locale files in input directory
   final sourceFiles = args.inputDir
       .listSync()
       .whereType<File>()
@@ -126,11 +133,29 @@ _MigrateResult _migrate(_MigrateArgs args) {
       migratedKeys: {},
       warnings: ['No locale files found in ${args.inputDir.path}'],
       errors: ['No locale files found for format: ${args.from}'],
+      manualKeys: const [],
     );
   }
 
-  // Create output directory if needed
   if (!args.dryRun) {
+    if (args.outputDir.existsSync()) {
+      final existing = args.outputDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.sway.json'))
+          .toList();
+      if (existing.isNotEmpty && !args.force) {
+        return _MigrateResult(
+          migratedKeys: {},
+          warnings: const [],
+          errors: [
+            'Output directory is not empty: ${args.outputDir.path}. '
+                'Pass --force to overwrite.',
+          ],
+          manualKeys: const [],
+        );
+      }
+    }
     args.outputDir.createSync(recursive: true);
   }
 
@@ -143,33 +168,49 @@ _MigrateResult _migrate(_MigrateArgs args) {
 
     try {
       final content = file.readAsStringSync();
+      final lower = file.path.toLowerCase();
+      if (lower.endsWith('.yaml') ||
+          lower.endsWith('.yml') ||
+          lower.endsWith('.csv')) {
+        errors.add(
+          '${file.path}: YAML/CSV migrate requires a JSON source in 0.1.0 '
+          '(no extra deps). Convert to JSON first, then re-run.',
+        );
+        continue;
+      }
+
       final sourceData = json.decode(content) as Map<String, dynamic>;
-      Map<String, dynamic> converted;
+      late Map<String, dynamic> converted;
 
       switch (args.from) {
         case 'arb':
-          converted = _convertArb(sourceData, args.nestOnPrefix, warnings);
+          converted = _convertArb(
+            sourceData,
+            args.nestOnPrefix,
+            warnings,
+            manualKeys,
+          );
         case 'easy_localization':
           converted = _convertEasyLocalization(sourceData, warnings);
         case 'slang':
-          converted = _convertSlang(sourceData, warnings);
+          converted = _convertSlang(sourceData, warnings, manualKeys);
         default:
           throw UnsupportedError('Format not implemented: ${args.from}');
       }
 
-      final keyCount = _countKeys(converted);
-      migratedKeys[languageCode] = keyCount;
+      if (converted.isEmpty) {
+        warnings.add('Skipped empty locale file: ${file.path}');
+        continue;
+      }
 
-      final outputPath = p.join(args.outputDir.path, '$languageCode.sway.json');
+      migratedKeys[languageCode] = _countKeys(converted);
+
+      final outputPath =
+          p.join(args.outputDir.path, '$languageCode.sway.json');
 
       if (!args.dryRun) {
-        final outputFile = File(outputPath);
-        if (outputFile.existsSync() && !args.force) {
-          errors.add('Output file exists but --force not specified: $outputPath');
-          continue;
-        }
-        outputFile.writeAsStringSync(
-          const JsonEncoder.withIndent('  ').convert(converted),
+        File(outputPath).writeAsStringSync(
+          '${const JsonEncoder.withIndent('  ').convert(converted)}\n',
         );
       }
     } catch (e) {
@@ -181,6 +222,7 @@ _MigrateResult _migrate(_MigrateArgs args) {
     migratedKeys: migratedKeys,
     warnings: warnings,
     errors: errors,
+    manualKeys: manualKeys,
   );
 }
 
@@ -192,9 +234,11 @@ bool _isLocaleFile(String path, String format) {
     case 'easy_localization':
       return basename.endsWith('.json') ||
           basename.endsWith('.yaml') ||
+          basename.endsWith('.yml') ||
           basename.endsWith('.csv');
     case 'slang':
-      return basename.endsWith('.i18n.json') || basename.endsWith('.i18n.yaml');
+      return basename.endsWith('.i18n.json') ||
+          basename.endsWith('.i18n.yaml');
     default:
       return false;
   }
@@ -204,42 +248,37 @@ String? _extractLanguageCode(String path, String format) {
   final basename = p.basenameWithoutExtension(path);
   switch (format) {
     case 'arb':
-      // app_en.arb → en
       final parts = basename.split('_');
       if (parts.length >= 2) return parts.last;
     case 'easy_localization':
       return basename;
     case 'slang':
-      // en.i18n.json → en
       return basename.split('.').first;
   }
   return null;
 }
 
-/// Converts ARB format to Sway format.
 Map<String, dynamic> _convertArb(
   Map<String, dynamic> source,
   bool nestOnPrefix,
   List<String> warnings,
+  List<String> manualKeys,
 ) {
   final result = <String, dynamic>{};
 
   for (final entry in source.entries) {
-    // Skip metadata keys
     if (entry.key.startsWith('@@') || entry.key.startsWith('@')) continue;
+    if (entry.value is! String) continue;
 
-    if (entry.value is String) {
-      final value = entry.value as String;
-      final converted = _convertIcuPlurals(value, warnings);
-      final key = nestOnPrefix ? _nestKey(entry.key) : entry.key;
-      _setNested(result, key, converted);
-    }
+    final value = entry.value as String;
+    final converted = _convertIcuValue(value, entry.key, warnings, manualKeys);
+    final key = nestOnPrefix ? _nestKey(entry.key) : entry.key;
+    _setNested(result, key, converted);
   }
 
   return result;
 }
 
-/// Converts easy_localization format to Sway format.
 Map<String, dynamic> _convertEasyLocalization(
   Map<String, dynamic> source,
   List<String> warnings,
@@ -248,42 +287,47 @@ Map<String, dynamic> _convertEasyLocalization(
 
   for (final entry in source.entries) {
     if (entry.value is String) {
-      // Convert positional placeholders {0}, {1} to named
       var value = entry.value as String;
       var argIndex = 0;
-      value = value.replaceAllMapped(
-        RegExp(r'\{\}'),
-        (match) {
-          argIndex++;
-          warnings.add(
-            'Converted positional placeholder {} to {arg$argIndex} — '
-            'rename for clarity',
-          );
-          return '{arg$argIndex}';
-        },
-      );
+      value = value.replaceAllMapped(RegExp(r'\{\}'), (match) {
+        argIndex++;
+        warnings.add(
+          'Converted positional placeholder {} to {arg$argIndex} — '
+          'rename for clarity',
+        );
+        return '{arg$argIndex}';
+      });
+      // Also {0}, {1} style
+      value = value.replaceAllMapped(RegExp(r'\{(\d+)\}'), (match) {
+        final n = int.parse(match.group(1)!) + 1;
+        warnings.add(
+          'Converted positional placeholder {${match.group(1)}} to {arg$n}',
+        );
+        return '{arg$n}';
+      });
       result[entry.key] = value;
     } else if (entry.value is Map<String, dynamic>) {
-      result[entry.key] = _convertEasyLocalization(
-        entry.value as Map<String, dynamic>,
-        warnings,
-      );
+      final sub = entry.value as Map<String, dynamic>;
+      if (_looksLikePlural(sub)) {
+        result[entry.key] = Map<String, dynamic>.from(sub);
+      } else {
+        result[entry.key] = _convertEasyLocalization(sub, warnings);
+      }
     }
   }
 
   return result;
 }
 
-/// Converts slang format to Sway format.
 Map<String, dynamic> _convertSlang(
   Map<String, dynamic> source,
   List<String> warnings,
+  List<String> manualKeys,
 ) {
   final result = <String, dynamic>{};
 
   for (final entry in source.entries) {
     if (entry.value is String) {
-      // Convert $variable to {variable}
       var value = entry.value as String;
       value = value.replaceAllMapped(
         RegExp(r'\$(\w+)'),
@@ -291,146 +335,173 @@ Map<String, dynamic> _convertSlang(
       );
       result[entry.key] = value;
     } else if (entry.value is Map<String, dynamic>) {
-      result[entry.key] = _convertSlang(
-        entry.value as Map<String, dynamic>,
-        warnings,
-      );
+      final sub = entry.value as Map<String, dynamic>;
+      if (_looksLikePlural(sub)) {
+        final converted = <String, dynamic>{};
+        for (final e in sub.entries) {
+          if (e.value is String) {
+            converted[e.key] = (e.value as String).replaceAllMapped(
+              RegExp(r'\$(\w+)'),
+              (m) => '{${m.group(1)}}',
+            );
+          } else {
+            converted[e.key] = e.value;
+          }
+        }
+        result[entry.key] = converted;
+      } else if (sub.containsKey('(context)') ||
+          sub.keys.any((k) => k.startsWith('('))) {
+        manualKeys.add(entry.key);
+        warnings.add(
+          'slang context/enum variant at "${entry.key}" is unsupported — '
+          'kept as nested object for manual cleanup',
+        );
+        result[entry.key] = _convertSlang(sub, warnings, manualKeys);
+      } else {
+        result[entry.key] = _convertSlang(sub, warnings, manualKeys);
+      }
     }
   }
 
   return result;
 }
 
-/// Converts ICU plural syntax `{count, plural, one{...} other{...}}`
-/// to Sway's plural object form.
+/// Converts a string that may contain ICU plural/select syntax.
 ///
-/// Returns the original value if the syntax is too complex to auto-convert,
-/// with a warning added.
-String _convertIcuPlurals(String value, List<String> warnings) {
-  // Find ICU plural patterns: {var, plural, cat{body} cat{body} ...}
+/// Returns a [String] or a plural [Map]. Unconvertible ICU is left as the
+/// original string and recorded in [manualKeys].
+dynamic _convertIcuValue(
+  String value,
+  String key,
+  List<String> warnings,
+  List<String> manualKeys,
+) {
+  if (value.contains(', select,')) {
+    manualKeys.add(key);
+    warnings.add(
+      'Key "$key": ICU select is unsupported — left as original string for manual conversion',
+    );
+    return value;
+  }
+
   final pluralRegex = RegExp(r'\{(\w+),\s*plural,');
   final match = pluralRegex.firstMatch(value);
   if (match == null) return value;
 
+  // Only convert when the entire value is a single plural expression.
+  if (!value.trimLeft().startsWith('{') ||
+      match.start != value.indexOf('{')) {
+    manualKeys.add(key);
+    warnings.add(
+      'Key "$key": ICU plural is mixed with surrounding text — needs manual conversion',
+    );
+    return value;
+  }
+
   final varName = match.group(1)!;
-  final startIdx = match.end; // position after "plural,"
-
-  // Parse categories by tracking brace depth
+  var pos = match.end;
   final categories = <String, String>{};
-  var pos = startIdx;
-  final raw = value;
 
-  while (pos < raw.length) {
-    // Skip whitespace
-    while (pos < raw.length && raw[pos] == ' ') {
+  while (pos < value.length) {
+    while (pos < value.length && (value[pos] == ' ' || value[pos] == '\n')) {
       pos++;
     }
-    if (pos >= raw.length || raw[pos] == '}') break;
+    if (pos >= value.length || value[pos] == '}') break;
 
-    // Read category name (e.g., "one", "other", "few")
     final catStart = pos;
-    while (pos < raw.length && raw[pos] != '{' && raw[pos] != ' ') {
+    while (pos < value.length && value[pos] != '{' && value[pos] != ' ') {
       pos++;
     }
-    final category = raw.substring(catStart, pos).trim();
+    final category = value.substring(catStart, pos).trim();
     if (category.isEmpty) break;
 
-    // Skip whitespace
-    while (pos < raw.length && raw[pos] == ' ') {
+    while (pos < value.length && value[pos] == ' ') {
       pos++;
     }
-    if (pos >= raw.length || raw[pos] != '{') break;
-    pos++; // skip opening {
+    if (pos >= value.length || value[pos] != '{') break;
+    pos++;
 
-    // Read body with brace depth tracking
     var depth = 1;
     final bodyStart = pos;
-    while (pos < raw.length && depth > 0) {
-      if (raw[pos] == '{') {
+    while (pos < value.length && depth > 0) {
+      if (value[pos] == '{') {
         depth++;
-      } else if (raw[pos] == '}') {
+      } else if (value[pos] == '}') {
         depth--;
       }
       if (depth > 0) pos++;
     }
-    final body = raw.substring(bodyStart, pos);
-    if (pos < raw.length) pos++; // skip closing }
+    final body = value.substring(bodyStart, pos);
+    if (pos < value.length) pos++;
 
-    categories[category] = body;
+    if (body.contains('select') || body.contains('plural')) {
+      manualKeys.add(key);
+      warnings.add(
+        'Key "$key": nested ICU select/plural — needs manual conversion',
+      );
+      return value;
+    }
+
+    // `#` → `{count}` (Sway reserved). Also rewrite `{varName}` → `{count}`.
+    var normalized = body.replaceAll('#', '{count}');
+    if (varName != 'count') {
+      normalized = normalized.replaceAll('{$varName}', '{count}');
+    }
+    categories[category] = normalized;
   }
 
-  if (categories.isEmpty) {
+  if (categories.isEmpty || !categories.containsKey('other')) {
+    manualKeys.add(key);
     warnings.add(
-      'ICU plural syntax detected but no categories found in "$value" — needs manual conversion',
+      'Key "$key": ICU plural missing categories/other — needs manual conversion',
     );
     return value;
   }
 
-  // Check that 'other' exists
-  if (!categories.containsKey('other')) {
+  if (varName != 'count') {
     warnings.add(
-      'ICU plural in "$value" missing "other" category — needs manual conversion',
+      'Key "$key": ICU plural variable "$varName" mapped to {count}',
     );
-    return value;
   }
 
-  // Check for select blocks or other complex patterns that we can't convert
-  final hasComplexPatterns = categories.values.any(
-    (body) => body.contains('select') || body.contains('plural'),
-  );
-  if (hasComplexPatterns) {
-    warnings.add(
-      'ICU plural in "$value" contains nested select/plural — needs manual conversion',
-    );
-    return value;
-  }
-
-  // Build the converted value: replace the ICU pattern with {varName}
-  // and return the categories as a map-like structure
-  // Since we can't return a Map from a String converter,
-  // we return a JSON-like string that the caller can parse
-  final resultBuffer = StringBuffer();
-  resultBuffer.write('{');
-  var first = true;
-  for (final entry in categories.entries) {
-    if (!first) resultBuffer.write(', ');
-    first = false;
-    // Replace # with the count variable reference
-    final body = entry.value.replaceAll('#', '{$varName}');
-    resultBuffer.write('"${entry.key}": "$body"');
-  }
-  resultBuffer.write('}');
-
-  warnings.add(
-    'Converted ICU plural in "$value" to Sway format',
-  );
-  return resultBuffer.toString();
+  return categories;
 }
 
-/// Nests an underscore-separated key: `home_title` → `home.title`.
-String _nestKey(String key) {
-  return key.replaceAll('_', '.');
+bool _looksLikePlural(Map<String, dynamic> map) {
+  if (map.isEmpty) return false;
+  const cats = {'zero', 'one', 'two', 'few', 'many', 'other'};
+  return map.keys.every(cats.contains);
 }
 
-/// Sets a value at a dot-separated path in a nested map.
+String _nestKey(String key) => key.replaceAll('_', '.');
+
 void _setNested(Map<String, dynamic> map, String path, dynamic value) {
   final parts = path.split('.');
   var current = map;
 
   for (var i = 0; i < parts.length - 1; i++) {
-    current = current.putIfAbsent(parts[i], () => <String, dynamic>{})
-        as Map<String, dynamic>;
+    final next = current.putIfAbsent(parts[i], () => <String, dynamic>{});
+    if (next is! Map<String, dynamic>) {
+      throw StateError('Key collision while nesting at "${parts[i]}"');
+    }
+    current = next;
   }
 
+  if (current.containsKey(parts.last) && current[parts.last] is Map) {
+    throw StateError('Key collision at "$path"');
+  }
   current[parts.last] = value;
 }
 
-/// Counts all leaf keys in a nested map.
 int _countKeys(Map<String, dynamic> map) {
   var count = 0;
   for (final value in map.values) {
     if (value is Map<String, dynamic>) {
-      count += _countKeys(value);
+      if (_looksLikePlural(value)) {
+        count++;
+      } else {
+        count += _countKeys(value);
+      }
     } else {
       count++;
     }
@@ -448,14 +519,24 @@ void _printReport(_MigrateResult result) {
     for (final entry in result.migratedKeys.entries) {
       stdout.writeln('  ${entry.key}: ${entry.value} keys');
     }
-    stdout.writeln('  Total: ${result.migratedKeys.values.fold(0, (a, b) => a + b)} keys');
+    stdout.writeln(
+      '  Total: ${result.migratedKeys.values.fold(0, (a, b) => a + b)} keys',
+    );
+  }
+
+  if (result.manualKeys.isNotEmpty) {
+    stdout.writeln();
+    stdout.writeln('Needs manual conversion (${result.manualKeys.length}):');
+    for (final key in result.manualKeys) {
+      stdout.writeln('  • $key');
+    }
   }
 
   if (result.warnings.isNotEmpty) {
     stdout.writeln();
     stdout.writeln('Warnings (${result.warnings.length}):');
     for (final warning in result.warnings) {
-      stdout.writeln('  ⚠ $warning');
+      stdout.writeln('  ! $warning');
     }
   }
 
@@ -463,7 +544,7 @@ void _printReport(_MigrateResult result) {
     stdout.writeln();
     stdout.writeln('Errors (${result.errors.length}):');
     for (final error in result.errors) {
-      stdout.writeln('  ✗ $error');
+      stdout.writeln('  x $error');
     }
   }
 
@@ -492,11 +573,13 @@ class _MigrateResult {
   final Map<String, int> migratedKeys;
   final List<String> warnings;
   final List<String> errors;
+  final List<String> manualKeys;
 
   const _MigrateResult({
     required this.migratedKeys,
     required this.warnings,
     required this.errors,
+    required this.manualKeys,
   });
 
   int get errorCount => errors.length;
