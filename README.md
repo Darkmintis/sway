@@ -1,44 +1,36 @@
-<p align="center">
-  <img src="branding/app_logo.png" alt="Sway" width="120" />
-</p>
+# Sway
 
-<h1 align="center">Sway</h1>
+**The localization layer for Flutter** — type-safe strings, an in-app locale switcher, and one-command migration from ARB, easy_localization, and slang.
 
 <p align="center">
-  The localization layer for Flutter — simple to author, instant to test, painless to migrate into.
+  <a href="https://pub.dev/packages/sway"><img src="https://img.shields.io/pub/v/sway.svg" alt="pub package" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
 </p>
 
 <p align="center">
-  <table>
-    <tr>
-      <td align="center" width="20%"><img src="branding/ss1.png" alt="Screenshot 1" width="100%" /></td>
-      <td align="center" width="20%"><img src="branding/ss2.png" alt="Screenshot 2" width="100%" /></td>
-      <td align="center" width="20%"><img src="branding/ss3.png" alt="Screenshot 3" width="100%" /></td>
-      <td align="center" width="20%"><img src="branding/ss4.png" alt="Screenshot 4" width="100%" /></td>
-      <td align="center" width="20%"><img src="branding/ss5.png" alt="Screenshot 5" width="100%" /></td>
-    </tr>
-  </table>
+  <img src="branding/demo.gif" alt="Sway overlay: switch language and RTL/LTR in the example app" width="280" />
 </p>
 
-[![pub package](https://img.shields.io/pub/v/sway.svg)](https://pub.dev/packages/sway)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<p align="center"><em>Debug overlay — change language and force RTL/LTR without touching device settings.</em></p>
 
-Type-safe Flutter localization with an instant in-app locale switcher and zero-friction migration from ARB, easy_localization, and slang.
+## Why Sway?
 
-## Features
+| Need | Sway |
+|------|------|
+| Nested JSON → type-safe Dart | `dart run sway:codegen` |
+| Switch locale / preview RTL in debug | `SwayOverlay` |
+| Keep ARB / easy_localization / slang | Overlay-only adapters |
+| Move into Sway later | `dart run sway:migrate` |
 
-- **Format + Codegen** — plain JSON per locale → nested type-safe Dart accessors
-- **Overlay** — draggable debug bubble to switch locale and force RTL/LTR instantly
-- **Migration CLI** — one-shot conversion from ARB, easy_localization, and slang
-- CLDR plural rules, RTL table, cross-locale validation
-
-## Quickstart
+## Install
 
 ```bash
 dart pub add sway
 ```
 
-1. Create `lib/i18n/en.sway.json` (and more locales):
+## 60-second quickstart (full Sway format)
+
+**1. Create** `lib/i18n/en.sway.json`:
 
 ```json
 {
@@ -52,7 +44,74 @@ dart pub add sway
 }
 ```
 
-2. Optional `lib/i18n/sway.config.json`:
+**2. Generate**
+
+```bash
+dart run sway:codegen
+```
+
+Creates `sway.g.dart` + `sway_en.g.dart` (and more locales as you add them).
+
+**3. Wire the app**
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:sway/sway.dart';
+import 'i18n/sway.g.dart';
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale _locale = const Locale('en');
+  late final adapter = SwayFormatAdapter(
+    supportedLocales: SwayTranslations.supportedLocales,
+    currentLocale: _locale,
+    onLocaleChange: (l) => setState(() => _locale = l),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final translations = SwayTranslations.forLocale(_locale);
+    return MaterialApp(
+      locale: _locale,
+      supportedLocales: SwayTranslations.supportedLocales,
+      home: SwayScope(
+        translations: translations,
+        child: SwayOverlay(
+          adapter: adapter,
+          child: const HomePage(),
+        ),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t; // shorthand
+    return Text(t.home.welcome(name: 'Dipesh'));
+  }
+}
+```
+
+### API cheatsheet
+
+| Style | Code |
+|--------|------|
+| Shorthand | `context.t.home.welcome(name: '…')` |
+| Context longhand | `SwayTranslations.of(context)` / `context.sway` |
+| By locale | `SwayTranslations.forLocale(locale)` |
+| Plurals | `t.home.itemCount(count: n)` |
+
+Nested keys match your JSON (`profile.editProfile` → `t.profile.editProfile`) so sections with the same leaf name (`title`) never collide.
+
+## Optional config — `lib/i18n/sway.config.json`
 
 ```json
 {
@@ -63,125 +122,97 @@ dart pub add sway
 }
 ```
 
-3. Generate:
+| Field | Meaning |
+|-------|---------|
+| `baseLocale` | Schema of truth for validation |
+| `localeDir` | Where `*.sway.json` live |
+| `outputFile` | Main generated Dart file |
+| `fallbackStrategy` | `baseLocale` or `key` for missing strings |
 
-```bash
-dart run sway:codegen
-```
+## Overlay only (keep ARB / gen-l10n)
 
-This writes a main library plus one file per locale (Flutter gen-l10n style):
-
-```
-lib/i18n/sway.g.dart       # interfaces + registry — import this
-lib/i18n/sway_en.g.dart    # English (part of sway.g.dart)
-lib/i18n/sway_ar.g.dart    # Arabic
-…
-```
-
-Still one import: `import 'i18n/sway.g.dart';`
-
-4. Wire the app:
+You do **not** need Sway JSON to use the floating switcher:
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:sway/sway.dart';
-import 'i18n/sway.g.dart';
+late final adapter = IntlAdapter(
+  supportedLocales: AppLocalizations.supportedLocales,
+  currentLocale: _locale,
+  onLocaleChange: (l) => setState(() => _locale = l),
+);
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late final adapter = SwayFormatAdapter(
-    supportedLocales: SwayTranslations.supportedLocales,
-    currentLocale: const Locale('en'),
-    onLocaleChange: (locale) => setState(() => _locale = locale),
-  );
-  Locale _locale = const Locale('en');
-
-  @override
-  Widget build(BuildContext context) {
-    final t = SwayTranslations.of(_locale);
-    return MaterialApp(
-      locale: _locale,
-      supportedLocales: SwayTranslations.supportedLocales,
-      home: SwayOverlay(
-        adapter: adapter,
-        child: Scaffold(
-          body: Center(
-            child: Text(t.home.welcome(name: 'Dipesh')),
-          ),
-        ),
-      ),
-    );
-  }
-}
+MaterialApp(
+  locale: _locale,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: SwayOverlay(
+    adapter: adapter,
+    child: const MyHome(), // still uses AppLocalizations.of(context)
+  ),
+);
 ```
 
-Use plurals as:
-
-```dart
-Text(t.home.itemCount(count: cartItems.length));
-```
-
-## Overlay
-
-Place `SwayOverlay` under a route that has an `Overlay` (e.g. as `MaterialApp.home`), or wrap with your own `Overlay`.
-
-- Drag the bubble; it snaps to the nearest left/right edge
-- Tap to open locales + **Force RTL** / **Force LTR**
-- Absent in release builds (`kReleaseMode`) unless you use it only in debug/profile
-- Hard-disable anytime: `SwayOverlay.disabled(child: ...)` or `disabled: true`
+Also available: `EasyLocalizationAdapter`, `ManualAdapter`.  
+Details: [doc/OVERLAY_ONLY.md](doc/OVERLAY_ONLY.md)
 
 ## Migration
 
 ```bash
-# Recommended first: dry-run
-dart run sway:migrate --from arb --input lib/l10n --output lib/i18n_migrated --dry-run
-
+# Always dry-run first
+dart run sway:migrate --from arb --input lib/l10n --output lib/i18n --dry-run
 dart run sway:migrate --from arb --input lib/l10n --output lib/i18n
-dart run sway:migrate --from easy_localization --input lib/translations --output lib/i18n
+
+dart run sway:migrate --from easy_localization --input assets/translations --output lib/i18n
 dart run sway:migrate --from slang --input lib/i18n --output lib/i18n_migrated
 ```
 
 | Source | Notes |
 |--------|--------|
-| ARB | ICU plurals → Sway plural objects; `select` / nested ICU flagged for manual conversion |
-| easy_localization | JSON supported; YAML/CSV → convert to JSON first in 0.1.0 |
-| slang | `$name` → `{name}`; context/enum variants flagged |
+| ARB | ICU plurals → Sway plural objects; `select` flagged for manual fix |
+| easy_localization | JSON supported (YAML/CSV → convert to JSON first) |
+| slang | `$name` → `{name}` |
 
-## Comparison (factual)
+Full guide: [doc/MIGRATION.md](doc/MIGRATION.md)
 
-| | Sway | ARB / gen-l10n | easy_localization | slang |
-|--|------|----------------|-------------------|-------|
-| Nested JSON authoring | Yes | Flat ARB | Yes | Yes |
-| Type-safe codegen | Yes (CLI) | Yes | Runtime | Yes |
-| In-app locale overlay | Yes | No | No | No |
-| Force RTL preview | Yes | No | No | No |
-| Migrate from others | Built-in | — | — | — |
+## vs Flutter official (ARB + gen-l10n)
+
+| | Official | Sway |
+|--|----------|------|
+| Source | Flat `.arb` | Nested `.sway.json` |
+| Generate | `flutter gen-l10n` | `dart run sway:codegen` |
+| Output | Main + per-locale parts | Same idea |
+| Lookup | `AppLocalizations.of(context)!.key` | `context.t.section.key` |
+| Debug locale UI | — | Built-in overlay |
+| Migrate from others | — | Built-in CLI |
+
+Step-by-step: [doc/INTEGRATION.md](doc/INTEGRATION.md)
+
+## Commands
+
+```bash
+dart run sway:codegen
+dart run sway:migrate --from arb --input lib/l10n --output lib/i18n
+flutter test
+```
+
+## Example
+
+```bash
+cd example
+flutter run
+```
+
+Six locales (`en`, `ar`, `es`, `de`, `ja`, `he`), plurals, RTL, and the overlay.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| Overlay button does not move | Ensure you are on a debug/profile build; drag uses `OverlayEntry.markNeedsBuild` (update if on an older preview) |
-| Overlay missing | Pass an `adapter`; check console for loud `FlutterError` |
-| `Overlay.of` failed | Put `SwayOverlay` under `MaterialApp` (e.g. `home:`) |
-| Hot restart resets locale | Expected — overlay state survives hot **reload**, not full restart |
-| Codegen errors on extra keys | Base locale is schema of truth; remove extras or add them to the base file |
-| Generated file out of date | Re-run `dart run sway:codegen` after editing `*.sway.json` |
-
-Commit `sway.g.dart` + `sway_*.g.dart` parts, or regenerate in CI — pick one team convention.
-
-## Testing
-
-```bash
-flutter test
-```
+| `No SwayScope found` | Wrap UI with `SwayScope(translations: …)` |
+| Overlay button missing | Pass an `adapter`; check debug/profile (hidden in release) |
+| Overlay does not move | Drag the bubble; it snaps to left/right edge on release |
+| Locale badge stale | Use one shared adapter for app + overlay |
+| Codegen errors on extra keys | Base locale is schema of truth |
+| Hot restart resets locale | Expected (reload keeps it; restart does not) |
 
 ## License
 
