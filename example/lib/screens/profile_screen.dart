@@ -1,32 +1,85 @@
 import 'package:flutter/material.dart';
 
+import '../i18n/sway.g.dart';
+
 class ProfileScreen extends StatelessWidget {
-  final dynamic t;
+  final SwayTranslations t;
+
   const ProfileScreen({super.key, required this.t});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const SizedBox(height: 16),
-        const CircleAvatar(radius: 48, child: Icon(Icons.person, size: 48)),
-        const SizedBox(height: 12),
-        Center(child: Text(t.profileName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
-        const Center(child: Text('Darkmintis', style: TextStyle(fontSize: 16, color: Colors.grey))),
-        const SizedBox(height: 24),
-        Card(
-          child: Column(
-            children: [
-              ListTile(leading: const Icon(Icons.person), title: Text(t.profileName), trailing: const Text('Dipesh Mahat', style: TextStyle(color: Colors.grey))),
-              const Divider(height: 1),
-              ListTile(leading: const Icon(Icons.email), title: Text(t.profileEmail), trailing: const Text('dipesh@darkmintis.com', style: TextStyle(color: Colors.grey))),
-              const Divider(height: 1),
-              ListTile(leading: const Icon(Icons.calendar_today), title: Text(t.profileMemberSince(date: '2024'))),
-            ],
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(t.profile.title)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        children: [
+          Center(
+            child: CircleAvatar(
+              radius: 44,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Icon(
+                Icons.person,
+                size: 44,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              'Dipesh Mahat',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Center(
+            child: Text(
+              'dipesh@darkmintis.com',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              t.profile.memberSince(date: '2024'),
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.tonal(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(t.profile.editProfile)),
+              );
+            },
+            child: Text(t.profile.editProfile),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.badge_outlined),
+            title: Text(t.profile.name),
+            trailing: Text(
+              'Dipesh Mahat',
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.email_outlined),
+            title: Text(t.profile.email),
+            trailing: Text(
+              'dipesh@darkmintis.com',
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

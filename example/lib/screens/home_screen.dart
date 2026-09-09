@@ -1,100 +1,147 @@
 import 'package:flutter/material.dart';
 
+import '../i18n/sway.g.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  final dynamic t;
+class HomeScreen extends StatelessWidget {
+  final SwayTranslations t;
   final Locale locale;
-  const HomeScreen({super.key, required this.t, required this.locale});
+  final int tabIndex;
+  final ValueChanged<int> onTabChanged;
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  const HomeScreen({
+    super.key,
+    required this.t,
+    required this.locale,
+    required this.tabIndex,
+    required this.onTabChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final t = widget.t;
     return Scaffold(
       body: IndexedStack(
-        index: _selectedIndex,
+        index: tabIndex,
         children: [
           _HomeTab(t: t),
-          SettingsScreen(t: t, locale: widget.locale),
+          SettingsScreen(t: t, locale: locale),
           ProfileScreen(t: t),
         ],
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) => setState(() => _selectedIndex = i),
+        selectedIndex: tabIndex,
+        onDestinationSelected: onTabChanged,
         destinations: [
-          NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: t.appTitle),
-          NavigationDestination(icon: const Icon(Icons.settings_outlined), selectedIcon: const Icon(Icons.settings), label: t.settingsTitle),
-          NavigationDestination(icon: const Icon(Icons.person_outlined), selectedIcon: const Icon(Icons.person), label: t.profileTitle),
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: t.app.title,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: t.settings.title,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outlined),
+            selectedIcon: const Icon(Icons.person),
+            label: t.profile.title,
+          ),
         ],
       ),
     );
   }
 }
 
-class _HomeTab extends StatelessWidget {
-  final dynamic t;
+class _HomeTab extends StatefulWidget {
+  final SwayTranslations t;
+
   const _HomeTab({required this.t});
 
   @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  int _itemCount = 1;
+
+  @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(t.homeWelcome(name: 'Dipesh'), style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                Text(t.homeDescription),
-              ],
+    final t = widget.t;
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(t.app.title)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        children: [
+          Text(
+            t.app.subtitle,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Pluralization', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Text('1: ${t.itemCountOne(count: 1)}'),
-                Text('5: ${t.itemCountOther(count: 5)}'),
-                Text('100: ${t.itemCountOther(count: 100)}'),
-              ],
+          const SizedBox(height: 8),
+          Text(
+            t.home.welcome(name: 'Dipesh'),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Placeholders', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Text(t.profileMemberSince(date: '2024')),
-                Text(t.messageCountOther(count: 12)),
-              ],
+          const SizedBox(height: 12),
+          Text(t.home.description, style: theme.textTheme.bodyLarge),
+          const SizedBox(height: 8),
+          Text(
+            t.home.overlayHint,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 24),
+          Text(
+            t.home.itemCount(count: _itemCount),
+            style: theme.textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              IconButton.filledTonal(
+                onPressed:
+                    _itemCount > 0 ? () => setState(() => _itemCount--) : null,
+                icon: const Icon(Icons.remove),
+              ),
+              Expanded(
+                child: Slider(
+                  value: _itemCount.toDouble().clamp(0, 20),
+                  min: 0,
+                  max: 20,
+                  divisions: 20,
+                  label: '$_itemCount',
+                  onChanged: (v) => setState(() => _itemCount = v.round()),
+                ),
+              ),
+              IconButton.filledTonal(
+                onPressed: _itemCount < 20
+                    ? () => setState(() => _itemCount++)
+                    : null,
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            t.home.messageCount(count: _itemCount),
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            t.profile.memberSince(date: '2024'),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

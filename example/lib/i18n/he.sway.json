@@ -1,0 +1,46 @@
+{
+  "app": {
+    "title": "Sway",
+    "subtitle": "לוקליזציה ל-Flutter"
+  },
+  "home": {
+    "welcome": "ברוך הבא, {name}!",
+    "description": "כתבו JSON, קבלו Dart בטוח טיפוסים, והחליפו שפה מיד עם הכפתור הצף.",
+    "overlayHint": "גררו את הכפתור הצף ולחצו כדי להחליף שפה או לכפות RTL.",
+    "itemCount": {
+      "one": "פריט אחד",
+      "two": "שני פריטים",
+      "other": "{count} פריטים"
+    },
+    "messageCount": {
+      "one": "הודעה אחת",
+      "two": "שתי הודעות",
+      "other": "{count} הודעות"
+    }
+  },
+  "settings": {
+    "title": "הגדרות",
+    "language": "שפה",
+    "darkMode": "מצב כהה",
+    "notifications": "התראות",
+    "logout": "התנתקות",
+    "off": "כבוי",
+    "on": "פועל"
+  },
+  "profile": {
+    "title": "פרופיל",
+    "editProfile": "עריכת פרופיל",
+    "name": "שם",
+    "email": "אימייל",
+    "memberSince": "חבר מאז {date}"
+  },
+  "common": {
+    "ok": "אישור",
+    "cancel": "ביטול",
+    "save": "שמירה",
+    "delete": "מחיקה",
+    "loading": "טוען...",
+    "error": "משהו השתבש",
+    "retry": "נסה שוב"
+  }
+}

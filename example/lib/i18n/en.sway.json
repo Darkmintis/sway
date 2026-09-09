@@ -1,11 +1,12 @@
 {
   "app": {
-    "title": "Sway Demo",
+    "title": "Sway",
     "subtitle": "Localization for Flutter"
   },
   "home": {
     "welcome": "Welcome, {name}!",
-    "description": "Sway makes Flutter localization simple. Write JSON, get type-safe Dart.",
+    "description": "Write JSON, get type-safe Dart, and switch locales instantly with the floating button.",
+    "overlayHint": "Drag the floating button, then tap to switch language or force RTL.",
     "itemCount": {
       "one": "{count} item",
       "other": "{count} items"
@@ -20,7 +21,9 @@
     "language": "Language",
     "darkMode": "Dark Mode",
     "notifications": "Notifications",
-    "logout": "Log out"
+    "logout": "Log out",
+    "off": "Off",
+    "on": "On"
   },
   "profile": {
     "title": "Profile",

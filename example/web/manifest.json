@@ -1,6 +1,6 @@
 {
-    "name": "basepackage_example",
-    "short_name": "basepackage_example",
+    "name": "Sway Demo",
+    "short_name": "Sway",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.darkmintis.basepackage_example"
+    namespace = "com.darkmintis.sway_example"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.darkmintis.basepackage_example"
+        applicationId = "com.darkmintis.sway_example"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode

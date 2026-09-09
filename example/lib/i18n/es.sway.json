@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "Sway",
+    "subtitle": "Localización para Flutter"
+  },
+  "home": {
+    "welcome": "¡Bienvenido, {name}!",
+    "description": "Escribe JSON, obtén Dart tipado y cambia el idioma al instante con el botón flotante.",
+    "overlayHint": "Arrastra el botón flotante y tócalo para cambiar el idioma o forzar RTL.",
+    "itemCount": {
+      "one": "{count} elemento",
+      "other": "{count} elementos"
+    },
+    "messageCount": {
+      "one": "{count} mensaje",
+      "other": "{count} mensajes"
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "darkMode": "Modo oscuro",
+    "notifications": "Notificaciones",
+    "logout": "Cerrar sesión",
+    "off": "Desactivado",
+    "on": "Activado"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar perfil",
+    "name": "Nombre",
+    "email": "Correo",
+    "memberSince": "Miembro desde {date}"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "retry": "Reintentar"
+  }
+}

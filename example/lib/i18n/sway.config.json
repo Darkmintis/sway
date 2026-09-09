@@ -1,0 +1,6 @@
+{
+  "baseLocale": "en",
+  "localeDir": "lib/i18n",
+  "outputFile": "lib/i18n/sway.g.dart",
+  "fallbackStrategy": "baseLocale"
+}

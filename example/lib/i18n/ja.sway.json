@@ -1,0 +1,42 @@
+{
+  "app": {
+    "title": "Sway",
+    "subtitle": "Flutterのローカライズ"
+  },
+  "home": {
+    "welcome": "ようこそ、{name}さん！",
+    "description": "JSONを書いて型安全なDartを生成。フローティングボタンですぐに言語を切り替えられます。",
+    "overlayHint": "フローティングボタンをドラッグし、タップして言語切替やRTL強制ができます。",
+    "itemCount": {
+      "other": "{count} 件"
+    },
+    "messageCount": {
+      "other": "{count} 件のメッセージ"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "darkMode": "ダークモード",
+    "notifications": "通知",
+    "logout": "ログアウト",
+    "off": "オフ",
+    "on": "オン"
+  },
+  "profile": {
+    "title": "プロフィール",
+    "editProfile": "プロフィールを編集",
+    "name": "名前",
+    "email": "メール",
+    "memberSince": "{date}からメンバー"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "loading": "読み込み中...",
+    "error": "問題が発生しました",
+    "retry": "再試行"
+  }
+}
