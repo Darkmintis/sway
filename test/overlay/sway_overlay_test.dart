@@ -40,7 +40,8 @@ void main() {
     expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
   });
 
-  testWidgets('drag updates bubble position then snaps to edge', (tester) async {
+  testWidgets('drag updates bubble position then snaps to edge',
+      (tester) async {
     final adapter = SwayFormatAdapter(
       supportedLocales: const [Locale('en'), Locale('ar')],
       currentLocale: const Locale('en'),
@@ -126,7 +127,8 @@ void main() {
 
     // Simulate a tap via tiny pan (below slop) ending.
     final button = find.byIcon(Icons.translate_rounded);
-    await tester.timedDrag(button, const Offset(2, 0), const Duration(milliseconds: 50));
+    await tester.timedDrag(
+        button, const Offset(2, 0), const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
     expect(find.text('Force RTL'), findsOneWidget);
