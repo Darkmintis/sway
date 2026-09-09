@@ -27,13 +27,13 @@ class SwayTranslationsAr {
     String get homeDescription => 'سواي يجعل ترجمة فلاتر بسيطة. اكتب JSON واحصل على Dart آمن بالأنواع.';
 
     /// `لا عناصر`
-    String get itemCountZero => 'لا عناصر';
+    String itemCountZero({required num count}) => 'لا عناصر';
 
     /// `عنصر واحد`
-    String get itemCountOne => 'عنصر واحد';
+    String itemCountOne({required num count}) => 'عنصر واحد';
 
     /// `عنصران`
-    String get itemCountTwo => 'عنصران';
+    String itemCountTwo({required num count}) => 'عنصران';
 
     /// `{count} عناصر`
     String itemCountFew({required num count}) => '$count عناصر';
@@ -45,13 +45,13 @@ class SwayTranslationsAr {
     String itemCountOther({required num count}) => '$count عنصر';
 
     /// `لا رسائل`
-    String get messageCountZero => 'لا رسائل';
+    String messageCountZero({required num count}) => 'لا رسائل';
 
     /// `رسالة واحدة`
-    String get messageCountOne => 'رسالة واحدة';
+    String messageCountOne({required num count}) => 'رسالة واحدة';
 
     /// `رسالتان`
-    String get messageCountTwo => 'رسالتان';
+    String messageCountTwo({required num count}) => 'رسالتان';
 
     /// `{count} رسائل`
     String messageCountFew({required num count}) => '$count رسائل';

@@ -108,6 +108,8 @@ void _emitLocale(
   buffer.writeln();
 }
 
+const _pluralCategories = {'zero', 'one', 'two', 'few', 'many', 'other'};
+
 /// Recursively emits flat getters for all keys in a nested map.
 void _emitFlatGetters(
   StringBuffer buffer,
@@ -122,7 +124,26 @@ void _emitFlatGetters(
     if (entry.value is String) {
       _emitStringGetter(buffer, path, entry.value as String, indent);
     } else if (entry.value is Map<String, dynamic>) {
-      _emitFlatGetters(buffer, entry.value as Map<String, dynamic>, '${key}_', indent);
+      final subMap = entry.value as Map<String, dynamic>;
+      final isPlural = subMap.keys.every((k) => _pluralCategories.contains(k));
+
+      if (isPlural) {
+        final allPlaceholders = <String>{};
+        for (final v in subMap.values) {
+          if (v is String) {
+            for (final m in RegExp(r'\{(\w+)\}').allMatches(v)) {
+              allPlaceholders.add(m.group(1)!);
+            }
+          }
+        }
+        for (final sub in subMap.entries) {
+          final subPath = '${key}_${sub.key}';
+          _emitStringGetter(buffer, subPath, sub.value as String, indent,
+              forcedPlaceholders: allPlaceholders);
+        }
+      } else {
+        _emitFlatGetters(buffer, subMap, '${key}_', indent);
+      }
     }
   }
 }
@@ -132,25 +153,26 @@ void _emitStringGetter(
   StringBuffer buffer,
   String key,
   String value,
-  int indent,
-) {
+  int indent, {
+  Set<String>? forcedPlaceholders,
+}) {
   final pad = '  ' * indent;
   final methodName = _toCamelCase(key);
-  final placeholders = RegExp(r'\{(\w+)\}').allMatches(value).toList();
+  final placeholders = forcedPlaceholders ??
+      RegExp(r'\{(\w+)\}').allMatches(value).map((m) => m.group(1)!).toSet();
 
   if (placeholders.isEmpty) {
     buffer.writeln('$pad/// `$value`');
     buffer.writeln("${pad}String get $methodName => '${_escape(value)}';");
   } else {
-    final params = placeholders.map((m) {
-      final name = m.group(1)!;
+    final sorted = placeholders.toList()..sort();
+    final params = sorted.map((name) {
       final type = name == 'count' ? 'num' : 'String';
       return 'required $type $name';
     }).join(', ');
 
     var interpolated = value;
-    for (final m in placeholders) {
-      final name = m.group(1)!;
+    for (final name in placeholders) {
       interpolated = interpolated.replaceAll('{$name}', '\$$name');
     }
 
