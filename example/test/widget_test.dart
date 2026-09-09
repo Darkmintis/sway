@@ -1,9 +1,9 @@
-import 'package:basepackage_example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sway_example/main.dart';
 
 void main() {
-  testWidgets('ExampleApp builds', (tester) async {
+  testWidgets('App builds without errors', (WidgetTester tester) async {
     await tester.pumpWidget(const ExampleApp());
-    expect(find.text('Example'), findsOneWidget);
+    expect(find.text('Sway Demo'), findsOneWidget);
   });
 }

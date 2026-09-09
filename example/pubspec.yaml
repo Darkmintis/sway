@@ -1,5 +1,5 @@
-name: basepackage_example
-description: Demonstrates the basepackage shared utilities.
+name: sway_example
+description: Demonstrates the sway localization package.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  basepackage:
+  sway:
     path: ../
 
 dev_dependencies:
