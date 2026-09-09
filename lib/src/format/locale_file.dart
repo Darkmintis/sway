@@ -82,7 +82,9 @@ class ParsedLocaleFile {
   static String _extractLanguageCode(String path) {
     final basename = path.split(Platform.pathSeparator).last;
     final parts = basename.split('.');
-    if (parts.length < 3 || parts.last != 'json' || parts[parts.length - 2] != 'sway') {
+    if (parts.length < 3 ||
+        parts.last != 'json' ||
+        parts[parts.length - 2] != 'sway') {
       throw SwayJsonParseException(
         'Invalid Sway locale filename format. Expected <locale>.sway.json, got: $basename',
         filePath: path,

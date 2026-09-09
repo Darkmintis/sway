@@ -29,7 +29,8 @@ enum PluralCategory {
 /// For example, English (`en`) supports `one` and `other`.
 /// Arabic (`ar`) supports all six categories.
 Set<PluralCategory> supportedCategories(String languageCode) {
-  return _categories[languageCode.toLowerCase()] ?? {PluralCategory.one, PluralCategory.other};
+  return _categories[languageCode.toLowerCase()] ??
+      {PluralCategory.one, PluralCategory.other};
 }
 
 /// Resolves which plural category applies for a given [count] in [languageCode].
@@ -51,8 +52,18 @@ const Map<String, Set<PluralCategory>> _categories = {
   'es': {PluralCategory.one, PluralCategory.other},
   'it': {PluralCategory.one, PluralCategory.other},
   'pt': {PluralCategory.one, PluralCategory.other},
-  'ru': {PluralCategory.one, PluralCategory.few, PluralCategory.many, PluralCategory.other},
-  'pl': {PluralCategory.one, PluralCategory.few, PluralCategory.many, PluralCategory.other},
+  'ru': {
+    PluralCategory.one,
+    PluralCategory.few,
+    PluralCategory.many,
+    PluralCategory.other
+  },
+  'pl': {
+    PluralCategory.one,
+    PluralCategory.few,
+    PluralCategory.many,
+    PluralCategory.other
+  },
   'ar': {
     PluralCategory.zero,
     PluralCategory.one,
@@ -86,7 +97,12 @@ PluralCategory Function(num) _getRuleFunction(String languageCode) {
   final code = languageCode.toLowerCase();
   if (code == 'ar') return _arabicPluralRule;
   if (code == 'he') return _hebrewPluralRule;
-  if (code == 'ru' || code == 'uk' || code == 'be' || code == 'hr' || code == 'sr' || code == 'bs') {
+  if (code == 'ru' ||
+      code == 'uk' ||
+      code == 'be' ||
+      code == 'hr' ||
+      code == 'sr' ||
+      code == 'bs') {
     return _slavicPluralRule;
   }
   if (code == 'pl') return _polishPluralRule;
@@ -122,7 +138,9 @@ PluralCategory _slavicPluralRule(num count) {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
     return PluralCategory.few;
   }
-  if (mod10 == 0 || (mod10 >= 5 && mod10 <= 9) || (mod100 >= 11 && mod100 <= 14)) {
+  if (mod10 == 0 ||
+      (mod10 >= 5 && mod10 <= 9) ||
+      (mod100 >= 11 && mod100 <= 14)) {
     return PluralCategory.many;
   }
   return PluralCategory.other;
@@ -135,7 +153,9 @@ PluralCategory _polishPluralRule(num count) {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
     return PluralCategory.few;
   }
-  if (mod10 >= 0 && mod10 <= 1 || (mod10 >= 5 && mod10 <= 9) || (mod100 >= 12 && mod100 <= 14)) {
+  if (mod10 >= 0 && mod10 <= 1 ||
+      (mod10 >= 5 && mod10 <= 9) ||
+      (mod100 >= 12 && mod100 <= 14)) {
     return PluralCategory.many;
   }
   return PluralCategory.other;

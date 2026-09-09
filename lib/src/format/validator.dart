@@ -9,6 +9,8 @@ import 'plural_rules.dart';
 
 /// Validates a set of parsed locale files against the Sway format rules.
 class SwayValidator {
+  SwayValidator._();
+
   /// Validates locale files and returns a [ValidationResult].
   ///
   /// [baseLocale] is the schema of truth. Extra keys in non-base locales
@@ -163,7 +165,8 @@ class SwayValidator {
 
         // Check if this is a plural object
         final isPlural = value.keys.every(
-          (k) => k == 'zero' ||
+          (k) =>
+              k == 'zero' ||
               k == 'one' ||
               k == 'two' ||
               k == 'few' ||
@@ -212,7 +215,8 @@ class SwayValidator {
         invalid.add(fullPath);
       }
       if (entry.value is Map<String, dynamic>) {
-        invalid.addAll(_findInvalidKeys(entry.value as Map<String, dynamic>, fullPath));
+        invalid.addAll(
+            _findInvalidKeys(entry.value as Map<String, dynamic>, fullPath));
       }
     }
     return invalid;
@@ -220,7 +224,8 @@ class SwayValidator {
 
   /// Flattens nested map keys into dot-separated paths.
   /// Plural category objects are treated as a single leaf key.
-  static Set<String> _flattenKeys(Map<String, dynamic> data, [String prefix = '']) {
+  static Set<String> _flattenKeys(Map<String, dynamic> data,
+      [String prefix = '']) {
     final keys = <String>{};
     for (final entry in data.entries) {
       final fullPath = prefix.isEmpty ? entry.key : '$prefix.${entry.key}';

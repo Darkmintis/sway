@@ -52,8 +52,7 @@ class SwayJsonParseException extends SwayFormatException {
 /// Thrown when a locale file has non-UTF8 encoding.
 class SwayEncodingException extends SwayFormatException {
   /// Creates a [SwayEncodingException].
-  const SwayEncodingException(
-    super.message, {super.filePath});
+  const SwayEncodingException(super.message, {super.filePath});
 }
 
 /// Thrown when validation detects a schema violation.
@@ -83,6 +82,5 @@ class SwayValidationException extends SwayFormatException {
 /// Thrown when codegen encounters an unrecoverable error.
 class SwayCodegenException extends SwayFormatException {
   /// Creates a [SwayCodegenException].
-  const SwayCodegenException(
-    super.message, {super.filePath});
+  const SwayCodegenException(super.message, {super.filePath});
 }
