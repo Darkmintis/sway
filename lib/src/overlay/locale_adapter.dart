@@ -5,7 +5,6 @@
 /// slang, or manual setup).
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Interface that the Sway overlay uses to interact with the host app's
@@ -14,6 +13,9 @@ import 'package:flutter/widgets.dart';
 /// Adapters are [Listenable] so the overlay can auto-detect locale changes
 /// made elsewhere in the app (settings screen, system, etc.).
 abstract class SwayLocaleAdapter extends ChangeNotifier {
+  /// Creates a [SwayLocaleAdapter].
+  SwayLocaleAdapter();
+
   /// Returns the list of locales the app supports.
   List<Locale> get supportedLocales;
 

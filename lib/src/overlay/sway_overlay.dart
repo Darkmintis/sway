@@ -203,9 +203,7 @@ class _SwayOverlayState extends State<SwayOverlay> {
     final midX = screen.width / 2;
     final snapLeft = _position!.dx + _kBubbleSize / 2 < midX;
     _position = Offset(
-      snapLeft
-          ? _kEdgeMargin
-          : screen.width - _kBubbleSize - _kEdgeMargin,
+      snapLeft ? _kEdgeMargin : screen.width - _kBubbleSize - _kEdgeMargin,
       _position!.dy.clamp(
         _kEdgeMargin,
         screen.height - _kBubbleSize - _kEdgeMargin,
@@ -286,15 +284,13 @@ class _SwayOverlayState extends State<SwayOverlay> {
     final locales = controller.supportedLocales;
     final filtered = _searchQuery.isEmpty
         ? locales
-        : locales
-            .where((l) {
-              final name = SwayLocaleMeta.fromLanguageCode(l.languageCode)
-                  .displayName
-                  .toLowerCase();
-              final q = _searchQuery.toLowerCase();
-              return name.contains(q) || l.languageCode.contains(q);
-            })
-            .toList();
+        : locales.where((l) {
+            final name = SwayLocaleMeta.fromLanguageCode(l.languageCode)
+                .displayName
+                .toLowerCase();
+            final q = _searchQuery.toLowerCase();
+            return name.contains(q) || l.languageCode.contains(q);
+          }).toList();
     final screen = MediaQuery.sizeOf(context);
     final showSearch = locales.length > 8;
     final panelHeight = (showSearch ? 56.0 : 0) +

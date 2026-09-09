@@ -49,7 +49,8 @@ class _ForceRebuildScopeState extends State<ForceRebuildScope> {
 
     // Key forces full remount on any locale/direction change
     return KeyedSubtree(
-      key: ValueKey('sway-${widget.locale}-${widget.forceRtl}-${widget.forceLtr}'),
+      key: ValueKey(
+          'sway-${widget.locale}-${widget.forceRtl}-${widget.forceLtr}'),
       child: Directionality(
         textDirection: direction,
         child: widget.child,
