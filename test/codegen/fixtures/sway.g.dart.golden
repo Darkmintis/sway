@@ -62,12 +62,59 @@ abstract class SwayTranslations {
     Locale('ar'),
   ];
 
-  /// Returns translations for [locale], falling back to `en`.
-  static SwayTranslations of(Locale locale) {
+  /// Longhand: translations for [locale], falling back to `en`.
+  static SwayTranslations forLocale(Locale locale) {
     switch (locale.languageCode) {
       case 'ar': return ar;
       case 'en': return en;
       default: return en;
     }
   }
+
+  /// Flutter-style lookup from the nearest [SwayScope].
+  ///
+  /// Prefer shorthand: `context.t.home.welcome(name: …)`.
+  static SwayTranslations of(BuildContext context) => SwayScope.of(context);
+}
+
+/// Provides [SwayTranslations] to descendants (like `Localizations`).
+class SwayScope extends InheritedWidget {
+  /// Active translations for this subtree.
+  final SwayTranslations translations;
+
+  /// Creates a [SwayScope].
+  const SwayScope({
+    super.key,
+    required this.translations,
+    required super.child,
+  });
+
+  /// Looks up translations from [context].
+  static SwayTranslations of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<SwayScope>();
+    assert(
+      scope != null,
+      'No SwayScope found. Wrap your app with SwayScope(translations: SwayTranslations.forLocale(locale), child: …).',
+    );
+    return scope!.translations;
+  }
+
+  /// Same as [of], but returns null if missing.
+  static SwayTranslations? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SwayScope>()?.translations;
+  }
+
+  @override
+  bool updateShouldNotify(SwayScope oldWidget) =>
+      translations.locale != oldWidget.translations.locale ||
+      !identical(translations, oldWidget.translations);
+}
+
+/// Shorthand accessors for generated translations.
+extension SwayTranslationsX on BuildContext {
+  /// Shorthand: `context.t.home.welcome(name: 'Dipesh')`.
+  SwayTranslations get t => SwayTranslations.of(this);
+
+  /// Longhand alias of [t].
+  SwayTranslations get sway => SwayTranslations.of(this);
 }

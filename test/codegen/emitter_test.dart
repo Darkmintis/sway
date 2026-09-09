@@ -23,15 +23,23 @@ void main() {
     test('emits main library + per-locale parts', () {
       final result = SwayEmitter.emit(fixtures, config: config);
 
-      expect(result.files.keys, containsAll(['sway.g.dart', 'sway_en.g.dart', 'sway_ar.g.dart']));
+      expect(result.files.keys,
+          containsAll(['sway.g.dart', 'sway_en.g.dart', 'sway_ar.g.dart']));
 
       final main = result.files['sway.g.dart']!;
       expect(main, contains("part 'sway_en.g.dart';"));
       expect(main, contains("part 'sway_ar.g.dart';"));
       expect(main, contains('abstract class SwayTranslations'));
       expect(main, contains('abstract class SwayHomeTranslations'));
-      expect(main, contains('static SwayTranslations of(Locale locale)'));
+      expect(
+          main, contains('static SwayTranslations forLocale(Locale locale)'));
+      expect(
+          main, contains('static SwayTranslations of(BuildContext context)'));
+      expect(main, contains('class SwayScope extends InheritedWidget'));
+      expect(main, contains('SwayTranslations get t =>'));
       expect(main, isNot(contains('class SwayTranslationsEn')));
+      expect(
+          main, isNot(contains('static SwayTranslations of(Locale locale)')));
 
       final en = result.files['sway_en.g.dart']!;
       expect(en, contains("part of 'sway.g.dart';"));
