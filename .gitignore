@@ -17,3 +17,8 @@ pubspec.lock
 .local/
 
 graphify-out/
+
+# Screen-record sources — ship GIF only
+branding/*.mp4
+branding/*.mov
+branding/*.webm
