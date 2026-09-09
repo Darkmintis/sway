@@ -17,11 +17,25 @@ void main() {
       controller = OverlayController(adapter: adapter);
     });
 
+    tearDown(() {
+      controller.dispose();
+    });
+
     test('initializes with adapter current locale', () {
       expect(controller.currentLocale, const Locale('en'));
       expect(controller.forceRtl, isFalse);
       expect(controller.forceLtr, isFalse);
       expect(controller.isExpanded, isFalse);
+    });
+
+    test('syncs when adapter locale changes outside the overlay', () {
+      var notified = false;
+      controller.addListener(() => notified = true);
+
+      adapter.setLocale(const Locale('ar'));
+
+      expect(controller.currentLocale, const Locale('ar'));
+      expect(notified, isTrue);
     });
 
     test('setLocale changes current locale', () {

@@ -7,6 +7,8 @@ import 'locale_adapter.dart';
 
 /// Manages the overlay's state: current locale, force RTL/LTR flags,
 /// expanded/collapsed state, and bubble position.
+///
+/// Auto-syncs when the [SwayLocaleAdapter] locale changes elsewhere in the app.
 class OverlayController extends ChangeNotifier {
   final SwayLocaleAdapter _adapter;
 
@@ -25,10 +27,11 @@ class OverlayController extends ChangeNotifier {
         _forcedLocale = initialLocale ?? adapter.currentLocale,
         _forceRtl = forceRtl,
         _forceLtr = forceLtr,
-        _isExpanded = false;
+        _isExpanded = false {
+    _adapter.addListener(_onAdapterChanged);
+  }
 
-  /// The currently selected locale (may differ from adapter's actual locale
-  /// if the overlay is forcing a different one).
+  /// The currently selected locale (kept in sync with the adapter).
   Locale get currentLocale => _forcedLocale;
 
   /// Whether RTL is being forced.
@@ -46,11 +49,19 @@ class OverlayController extends ChangeNotifier {
   /// All locales supported by the adapter.
   List<Locale> get supportedLocales => _adapter.supportedLocales;
 
+  void _onAdapterChanged() {
+    final next = _adapter.currentLocale;
+    if (_forcedLocale == next) return;
+    _forcedLocale = next;
+    notifyListeners();
+  }
+
   /// Switches to a different locale.
   void setLocale(Locale locale) {
-    if (_forcedLocale == locale) return;
+    if (_forcedLocale == locale && _adapter.currentLocale == locale) return;
     _forcedLocale = locale;
     _adapter.setLocale(locale);
+    // Adapter notify may call [_onAdapterChanged]; still notify for force-UI.
     notifyListeners();
   }
 
@@ -86,5 +97,11 @@ class OverlayController extends ChangeNotifier {
     _forceRtl = false;
     _forceLtr = false;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _adapter.removeListener(_onAdapterChanged);
+    super.dispose();
   }
 }

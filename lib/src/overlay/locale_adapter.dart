@@ -5,11 +5,15 @@
 /// slang, or manual setup).
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Interface that the Sway overlay uses to interact with the host app's
 /// localization system.
-abstract class SwayLocaleAdapter {
+///
+/// Adapters are [Listenable] so the overlay can auto-detect locale changes
+/// made elsewhere in the app (settings screen, system, etc.).
+abstract class SwayLocaleAdapter extends ChangeNotifier {
   /// Returns the list of locales the app supports.
   List<Locale> get supportedLocales;
 
@@ -21,16 +25,11 @@ abstract class SwayLocaleAdapter {
 }
 
 /// Adapter for apps using Sway's own generated format.
-///
-/// Auto-wired when `SwayTranslations` codegen output is present.
-class SwayFormatAdapter implements SwayLocaleAdapter {
+class SwayFormatAdapter extends SwayLocaleAdapter {
   /// Callback invoked when the locale changes.
   final void Function(Locale locale) onLocaleChange;
 
-  /// The list of supported locales.
   final List<Locale> _supportedLocales;
-
-  /// The current locale.
   Locale _currentLocale;
 
   /// Creates a [SwayFormatAdapter].
@@ -52,13 +51,12 @@ class SwayFormatAdapter implements SwayLocaleAdapter {
     if (_currentLocale == locale) return;
     _currentLocale = locale;
     onLocaleChange(locale);
+    notifyListeners();
   }
 }
 
 /// Adapter for apps using `easy_localization`.
-///
-/// Dev supplies the supported locales and a callback to set the locale.
-class EasyLocalizationAdapter implements SwayLocaleAdapter {
+class EasyLocalizationAdapter extends SwayLocaleAdapter {
   @override
   final List<Locale> supportedLocales;
 
@@ -82,14 +80,41 @@ class EasyLocalizationAdapter implements SwayLocaleAdapter {
     if (_currentLocale == locale) return;
     _currentLocale = locale;
     onLocaleChange(locale);
+    notifyListeners();
+  }
+}
+
+/// Adapter for apps using Flutter gen-l10n / `intl` (ARB).
+class IntlAdapter extends SwayLocaleAdapter {
+  @override
+  final List<Locale> supportedLocales;
+
+  /// Callback to set the locale.
+  final void Function(Locale locale) onLocaleChange;
+
+  Locale _currentLocale;
+
+  /// Creates an [IntlAdapter].
+  IntlAdapter({
+    required this.supportedLocales,
+    required Locale currentLocale,
+    required this.onLocaleChange,
+  }) : _currentLocale = currentLocale;
+
+  @override
+  Locale get currentLocale => _currentLocale;
+
+  @override
+  void setLocale(Locale locale) {
+    if (_currentLocale == locale) return;
+    _currentLocale = locale;
+    onLocaleChange(locale);
+    notifyListeners();
   }
 }
 
 /// Adapter for apps using a custom localization setup.
-///
-/// Dev supplies plain callbacks — covers any setup not handled by
-/// the built-in adapters.
-class ManualAdapter implements SwayLocaleAdapter {
+class ManualAdapter extends SwayLocaleAdapter {
   @override
   final List<Locale> supportedLocales;
 
@@ -113,5 +138,6 @@ class ManualAdapter implements SwayLocaleAdapter {
     if (_currentLocale == locale) return;
     _currentLocale = locale;
     onLocaleChange(locale);
+    notifyListeners();
   }
 }
