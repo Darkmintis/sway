@@ -104,12 +104,15 @@ void _printUsage() {
   stdout.writeln(
     '  --from <format>        Source format: arb, easy_localization, slang',
   );
-  stdout.writeln('  --input <dir>          Directory containing source locale files');
+  stdout.writeln(
+      '  --input <dir>          Directory containing source locale files');
   stdout.writeln(
     '  --output <dir>         Output directory (default: ../i18n_migrated)',
   );
-  stdout.writeln('  --dry-run              Print summary without writing files');
-  stdout.writeln('  --force                Write into non-empty output directory');
+  stdout
+      .writeln('  --dry-run              Print summary without writing files');
+  stdout.writeln(
+      '  --force                Write into non-empty output directory');
   stdout.writeln(
     '  --nest-on-prefix       Split underscore-separated ARB keys into nesting',
   );
@@ -205,8 +208,7 @@ _MigrateResult _migrate(_MigrateArgs args) {
 
       migratedKeys[languageCode] = _countKeys(converted);
 
-      final outputPath =
-          p.join(args.outputDir.path, '$languageCode.sway.json');
+      final outputPath = p.join(args.outputDir.path, '$languageCode.sway.json');
 
       if (!args.dryRun) {
         File(outputPath).writeAsStringSync(
@@ -237,8 +239,7 @@ bool _isLocaleFile(String path, String format) {
           basename.endsWith('.yml') ||
           basename.endsWith('.csv');
     case 'slang':
-      return basename.endsWith('.i18n.json') ||
-          basename.endsWith('.i18n.yaml');
+      return basename.endsWith('.i18n.json') || basename.endsWith('.i18n.yaml');
     default:
       return false;
   }
@@ -389,8 +390,7 @@ dynamic _convertIcuValue(
   if (match == null) return value;
 
   // Only convert when the entire value is a single plural expression.
-  if (!value.trimLeft().startsWith('{') ||
-      match.start != value.indexOf('{')) {
+  if (!value.trimLeft().startsWith('{') || match.start != value.indexOf('{')) {
     manualKeys.add(key);
     warnings.add(
       'Key "$key": ICU plural is mixed with surrounding text — needs manual conversion',
@@ -458,13 +458,57 @@ dynamic _convertIcuValue(
     return value;
   }
 
+  final mapped = _mapIcuExactPluralKeys(categories, key, warnings, manualKeys);
+  if (mapped == null) return value;
+
   if (varName != 'count') {
     warnings.add(
       'Key "$key": ICU plural variable "$varName" mapped to {count}',
     );
   }
 
-  return categories;
+  return mapped;
+}
+
+/// Maps ICU exact forms (`=0`, `=1`, `=2`) to CLDR categories Sway accepts.
+///
+/// Returns `null` when an exact form cannot be mapped (caller keeps original).
+Map<String, String>? _mapIcuExactPluralKeys(
+  Map<String, String> categories,
+  String key,
+  List<String> warnings,
+  List<String> manualKeys,
+) {
+  const exactToCldr = {'=0': 'zero', '=1': 'one', '=2': 'two'};
+  final out = <String, String>{};
+
+  for (final entry in categories.entries) {
+    final cat = entry.key;
+    final mapped = exactToCldr[cat];
+    if (mapped != null) {
+      if (out.containsKey(mapped) && out[mapped] != entry.value) {
+        warnings.add(
+          'Key "$key": ICU "$cat" maps to "$mapped" which already exists — keeping existing "$mapped"',
+        );
+        continue;
+      }
+      out[mapped] = entry.value;
+      if (cat != mapped) {
+        warnings.add('Key "$key": ICU plural "$cat" mapped to "$mapped"');
+      }
+      continue;
+    }
+    if (cat.startsWith('=')) {
+      manualKeys.add(key);
+      warnings.add(
+        'Key "$key": ICU exact plural "$cat" is unsupported — left as original string for manual conversion',
+      );
+      return null;
+    }
+    out[cat] = entry.value;
+  }
+
+  return out;
 }
 
 bool _looksLikePlural(Map<String, dynamic> map) {
