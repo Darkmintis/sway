@@ -3,6 +3,15 @@ description: >-
   Type-safe Flutter localization with an instant in-app locale switcher and
   zero-friction migration from ARB, easy_localization, and slang.
 version: 0.1.0
+homepage: https://github.com/Darkmintis/sway
+repository: https://github.com/Darkmintis/sway
+issue_tracker: https://github.com/Darkmintis/sway/issues
+topics:
+  - localization
+  - i18n
+  - l10n
+  - translation
+  - flutter
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -17,5 +26,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+executables:
+  codegen: codegen
+  migrate: migrate
 
 flutter:

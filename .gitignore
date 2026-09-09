@@ -15,3 +15,5 @@ pubspec.lock
 **/Flutter/ephemeral/
 
 .local/
+
+graphify-out/
