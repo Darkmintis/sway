@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Example app",
+      "cwd": "example",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "Example app (profile)",
+      "cwd": "example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Example app (release)",
+      "cwd": "example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "Package tests",
+      "request": "launch",
+      "type": "dart",
+      "program": "test/basepackage_test.dart"
+    },
+    {
+      "name": "Example tests",
+      "cwd": "example",
+      "request": "launch",
+      "type": "dart",
+      "program": "test/widget_test.dart"
+    }
+  ]
+}

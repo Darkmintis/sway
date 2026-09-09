@@ -1,0 +1,17 @@
+.dart_tool/
+.idea/
+.pub/
+.metadata
+build/
+coverage/
+pubspec.lock
+*.iml
+.flutter-plugins
+.flutter-plugins-dependencies
+.DS_Store
+
+# Local / generated platform files
+**/local.properties
+**/Flutter/ephemeral/
+
+.local/
