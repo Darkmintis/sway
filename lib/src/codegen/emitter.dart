@@ -23,9 +23,12 @@ class SwayEmitResult {
 
 /// Generates type-safe nested Dart from parsed locale files.
 class SwayEmitter {
+  SwayEmitter._();
+
   /// Emits a main library + one part file per locale.
   ///
-  /// Keys are basenames relative to the output directory of [config.outputFile].
+  /// Keys are basenames relative to the output directory of
+  /// `config.outputFile`.
   static SwayEmitResult emit(
     List<ParsedLocaleFile> localeFiles, {
     required SwayConfig config,
@@ -169,9 +172,9 @@ class SwayEmitter {
     buffer.writeln('  ];');
     buffer.writeln();
     buffer.writeln(
-      '  /// Returns translations for [locale], falling back to `${base.languageCode}`.',
+      '  /// Longhand: translations for [locale], falling back to `${base.languageCode}`.',
     );
-    buffer.writeln('  static SwayTranslations of(Locale locale) {');
+    buffer.writeln('  static SwayTranslations forLocale(Locale locale) {');
     buffer.writeln('    switch (locale.languageCode) {');
     for (final file in all) {
       buffer.writeln(
@@ -181,6 +184,81 @@ class SwayEmitter {
     buffer.writeln('      default: return ${base.languageCode};');
     buffer.writeln('    }');
     buffer.writeln('  }');
+    buffer.writeln();
+    buffer.writeln(
+      '  /// Flutter-style lookup from the nearest [SwayScope].',
+    );
+    buffer.writeln('  ///');
+    buffer
+        .writeln('  /// Prefer shorthand: `context.t.home.welcome(name: …)`.');
+    buffer.writeln(
+      '  static SwayTranslations of(BuildContext context) => SwayScope.of(context);',
+    );
+    buffer.writeln('}');
+    buffer.writeln();
+    _emitScopeAndExtension(buffer);
+  }
+
+  static void _emitScopeAndExtension(StringBuffer buffer) {
+    buffer.writeln(
+      '/// Provides [SwayTranslations] to descendants (like `Localizations`).',
+    );
+    buffer.writeln('class SwayScope extends InheritedWidget {');
+    buffer.writeln('  /// Active translations for this subtree.');
+    buffer.writeln('  final SwayTranslations translations;');
+    buffer.writeln();
+    buffer.writeln('  /// Creates a [SwayScope].');
+    buffer.writeln('  const SwayScope({');
+    buffer.writeln('    super.key,');
+    buffer.writeln('    required this.translations,');
+    buffer.writeln('    required super.child,');
+    buffer.writeln('  });');
+    buffer.writeln();
+    buffer.writeln('  /// Looks up translations from [context].');
+    buffer.writeln('  static SwayTranslations of(BuildContext context) {');
+    buffer.writeln(
+      '    final scope = context.dependOnInheritedWidgetOfExactType<SwayScope>();',
+    );
+    buffer.writeln('    assert(');
+    buffer.writeln('      scope != null,');
+    buffer.writeln(
+      "      'No SwayScope found. Wrap your app with SwayScope(translations: SwayTranslations.forLocale(locale), child: …).',",
+    );
+    buffer.writeln('    );');
+    buffer.writeln('    return scope!.translations;');
+    buffer.writeln('  }');
+    buffer.writeln();
+    buffer.writeln('  /// Same as [of], but returns null if missing.');
+    buffer.writeln(
+      '  static SwayTranslations? maybeOf(BuildContext context) {',
+    );
+    buffer.writeln(
+      '    return context.dependOnInheritedWidgetOfExactType<SwayScope>()?.translations;',
+    );
+    buffer.writeln('  }');
+    buffer.writeln();
+    buffer.writeln('  @override');
+    buffer.writeln(
+      '  bool updateShouldNotify(SwayScope oldWidget) =>',
+    );
+    buffer.writeln(
+      '      translations.locale != oldWidget.translations.locale ||',
+    );
+    buffer.writeln(
+      '      !identical(translations, oldWidget.translations);',
+    );
+    buffer.writeln('}');
+    buffer.writeln();
+    buffer.writeln('/// Shorthand accessors for generated translations.');
+    buffer.writeln('extension SwayTranslationsX on BuildContext {');
+    buffer.writeln(
+        '  /// Shorthand: `context.t.home.welcome(name: \'Dipesh\')`.');
+    buffer.writeln('  SwayTranslations get t => SwayTranslations.of(this);');
+    buffer.writeln();
+    buffer.writeln('  /// Longhand alias of [t].');
+    buffer.writeln(
+      '  SwayTranslations get sway => SwayTranslations.of(this);',
+    );
     buffer.writeln('}');
   }
 
@@ -198,8 +276,7 @@ class SwayEmitter {
         if (_isPlural(sub)) {
           _emitAbstractPlural(buffer, key, sub);
         } else {
-          final childPath =
-              pathPrefix.isEmpty ? key : '$pathPrefix.$key';
+          final childPath = pathPrefix.isEmpty ? key : '$pathPrefix.$key';
           buffer.writeln('  /// Nested `$key` translations.');
           buffer.writeln('  ${_namespaceClass(childPath)} get $key;');
           buffer.writeln();
@@ -300,8 +377,7 @@ class SwayEmitter {
       if (_isPlural(baseSub)) continue;
 
       final key = entry.key;
-      final childPath =
-          pathPrefix.isEmpty ? key : '$pathPrefix.$key';
+      final childPath = pathPrefix.isEmpty ? key : '$pathPrefix.$key';
       final fileSub = data[key] is Map<String, dynamic>
           ? data[key] as Map<String, dynamic>
           : <String, dynamic>{};
@@ -368,8 +444,7 @@ class SwayEmitter {
               : baseSub;
           _emitImplPlural(buffer, key, plural, file.languageCode);
         } else {
-          final childPath =
-              pathPrefix.isEmpty ? key : '$pathPrefix.$key';
+          final childPath = pathPrefix.isEmpty ? key : '$pathPrefix.$key';
           final nestedClass =
               'Sway${_pathToSuffix(childPath)}Translations$localeSuffix';
           buffer.writeln('  @override');

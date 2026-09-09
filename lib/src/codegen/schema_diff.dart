@@ -6,6 +6,8 @@ import '../format/validator.dart';
 
 /// Thin wrapper around [SwayValidator] for codegen callers.
 class SchemaDiff {
+  SchemaDiff._();
+
   /// Validates [localeFiles] with [baseLocale] as schema of truth.
   static ValidationResult compare(
     List<ParsedLocaleFile> localeFiles, {
