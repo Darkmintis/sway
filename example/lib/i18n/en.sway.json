@@ -1,0 +1,41 @@
+{
+  "app": {
+    "title": "Sway Demo",
+    "subtitle": "Localization for Flutter"
+  },
+  "home": {
+    "welcome": "Welcome, {name}!",
+    "description": "Sway makes Flutter localization simple. Write JSON, get type-safe Dart.",
+    "itemCount": {
+      "one": "{count} item",
+      "other": "{count} items"
+    },
+    "messageCount": {
+      "one": "{count} message",
+      "other": "{count} messages"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "darkMode": "Dark Mode",
+    "notifications": "Notifications",
+    "logout": "Log out"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "name": "Name",
+    "email": "Email",
+    "memberSince": "Member since {date}"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again"
+  }
+}

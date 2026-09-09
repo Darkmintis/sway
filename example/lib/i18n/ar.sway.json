@@ -1,0 +1,49 @@
+{
+  "app": {
+    "title": "عرض سواي",
+    "subtitle": "الترجمة لفلاتر"
+  },
+  "home": {
+    "welcome": "!أهلاً {name}",
+    "description": "سواي يجعل ترجمة فلاتر بسيطة. اكتب JSON واحصل على Dart آمن بالأنواع.",
+    "itemCount": {
+      "zero": "لا عناصر",
+      "one": "عنصر واحد",
+      "two": "عنصران",
+      "few": "{count} عناصر",
+      "many": "{count} عنصرًا",
+      "other": "{count} عنصر"
+    },
+    "messageCount": {
+      "zero": "لا رسائل",
+      "one": "رسالة واحدة",
+      "two": "رسالتان",
+      "few": "{count} رسائل",
+      "many": "{count} رسالة",
+      "other": "{count} رسالة"
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "darkMode": "الوضع الداكن",
+    "notifications": "الإشعارات",
+    "logout": "تسجيل الخروج"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "editProfile": "تعديل الملف الشخصي",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "memberSince": "عضو منذ {date}"
+  },
+  "common": {
+    "ok": "موافق",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "إعادة المحاولة"
+  }
+}
