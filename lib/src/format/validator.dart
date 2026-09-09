@@ -80,7 +80,7 @@ class SwayValidator {
     _validatePlaceholders(localeFiles, baseFile, errors);
 
     // Validate plural categories across locales
-    _validatePluralCategories(localeFiles, errors);
+    _validatePluralCategories(localeFiles, errors, warnings);
 
     return ValidationResult(
       isValid: errors.isEmpty,
@@ -153,6 +153,7 @@ class SwayValidator {
   static void _validatePluralCategories(
     List<ParsedLocaleFile> localeFiles,
     List<String> errors,
+    List<String> warnings,
   ) {
     for (final file in localeFiles) {
       final allKeys = _flattenKeys(file.data);
@@ -179,7 +180,7 @@ class SwayValidator {
           continue;
         }
 
-        // Warn about categories this locale doesn't support
+        // Unsupported categories are warnings — they are never selected at runtime.
         final supported = supportedCategories(file.languageCode);
         for (final category in value.keys) {
           final categoryEnum = PluralCategory.values.firstWhere(
@@ -187,9 +188,9 @@ class SwayValidator {
             orElse: () => PluralCategory.other,
           );
           if (!supported.contains(categoryEnum)) {
-            errors.add(
+            warnings.add(
               '${file.languageCode}: plural key "$key" has category "$category" '
-              'which is not supported by this locale\'s CLDR rules',
+              'which is not selected by this locale\'s CLDR rules',
             );
           }
         }
@@ -218,19 +219,36 @@ class SwayValidator {
   }
 
   /// Flattens nested map keys into dot-separated paths.
-  /// Includes both leaf keys and intermediate map keys.
+  /// Plural category objects are treated as a single leaf key.
   static Set<String> _flattenKeys(Map<String, dynamic> data, [String prefix = '']) {
     final keys = <String>{};
     for (final entry in data.entries) {
       final fullPath = prefix.isEmpty ? entry.key : '$prefix.${entry.key}';
       if (entry.value is Map<String, dynamic>) {
-        keys.add(fullPath);
-        keys.addAll(_flattenKeys(entry.value as Map<String, dynamic>, fullPath));
+        final sub = entry.value as Map<String, dynamic>;
+        if (_isPluralMap(sub)) {
+          keys.add(fullPath);
+        } else {
+          keys.addAll(_flattenKeys(sub, fullPath));
+        }
       } else {
         keys.add(fullPath);
       }
     }
     return keys;
+  }
+
+  static bool _isPluralMap(Map<String, dynamic> value) {
+    if (value.isEmpty) return false;
+    return value.keys.every(
+      (k) =>
+          k == 'zero' ||
+          k == 'one' ||
+          k == 'two' ||
+          k == 'few' ||
+          k == 'many' ||
+          k == 'other',
+    );
   }
 
   /// Resolves a dot-separated key path to its value.
