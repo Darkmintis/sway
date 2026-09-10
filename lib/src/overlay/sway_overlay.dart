@@ -1,5 +1,7 @@
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -10,21 +12,27 @@ import 'overlay_controller.dart';
 
 const double _kBubbleSize = 48;
 const double _kEdgeMargin = 8;
-const double _kPanelWidth = 220;
+const double _kPanelWidth = 200;
 const double _kDragTapSlop = 8;
+const Duration _kLongPressHide = Duration(milliseconds: 450);
+
+/// ponytail: process-local only (survives hot reload, not process kill).
+/// Upgrade: shared_preferences if QA needs cross-process restore.
+Offset? _persistedBubblePosition;
 
 /// A floating, draggable locale-switching overlay for development.
 ///
 /// Shows a persistent floating button. Tap to open a language picker
 /// panel anchored near the button. Drag snaps to the nearest screen edge.
+/// Long-press hides the bubble until hot reload / hot restart.
 /// Includes Force RTL / Force LTR preview toggles.
 ///
-/// Only active in debug/profile builds (absent in release unless you
-/// also pass [disabled]).
+/// Active in debug and profile by default (`!kReleaseMode`). Pass
+/// [debugOnly] to show only in debug builds.
 class SwayOverlay extends StatefulWidget {
   /// The child widget tree. Typically wraps content under a [MaterialApp]
-  /// route so an [Overlay] ancestor exists, or wrap [MaterialApp] itself
-  /// if you provide your own [Overlay].
+  /// route so an [Overlay] ancestor exists, or use `Sway.debugOverlay` under
+  /// [MaterialApp.builder] (nested Overlay host).
   final Widget child;
 
   /// The adapter providing locale support.
@@ -36,12 +44,17 @@ class SwayOverlay extends StatefulWidget {
   /// Whether the overlay is completely disabled (no button rendered).
   final bool disabled;
 
+  /// When true, show only in debug builds (`kDebugMode`). When false (default),
+  /// show in debug and profile (`!kReleaseMode`) for back-compat with 0.1.0.
+  final bool debugOnly;
+
   /// Creates a [SwayOverlay].
   const SwayOverlay({
     super.key,
     required this.child,
     this.adapter,
     this.disabled = false,
+    this.debugOnly = false,
   });
 
   /// Creates a disabled [SwayOverlay] (no button rendered).
@@ -49,7 +62,8 @@ class SwayOverlay extends StatefulWidget {
     super.key,
     required this.child,
   })  : adapter = null,
-        disabled = true;
+        disabled = true,
+        debugOnly = false;
 
   @override
   State<SwayOverlay> createState() => _SwayOverlayState();
@@ -63,9 +77,16 @@ class _SwayOverlayState extends State<SwayOverlay> {
   double _dragDistance = 0;
   String _searchQuery = '';
   bool _missingAdapterReported = false;
+  bool _userHidden = false;
+  Timer? _longPressTimer;
+
+  bool get _modeAllowsOverlay => widget.debugOnly ? kDebugMode : !kReleaseMode;
 
   bool get _active =>
-      !kReleaseMode && !widget.disabled && widget.adapter != null;
+      _modeAllowsOverlay &&
+      !widget.disabled &&
+      widget.adapter != null &&
+      !_userHidden;
 
   @override
   void initState() {
@@ -74,10 +95,22 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   @override
+  void reassemble() {
+    super.reassemble();
+    // Hot reload restores a long-press-hidden bubble.
+    if (_userHidden) {
+      _userHidden = false;
+      _teardownOverlay();
+      _initController();
+    }
+  }
+
+  @override
   void didUpdateWidget(SwayOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.adapter != oldWidget.adapter ||
-        widget.disabled != oldWidget.disabled) {
+        widget.disabled != oldWidget.disabled ||
+        widget.debugOnly != oldWidget.debugOnly) {
       _teardownOverlay();
       _initController();
     }
@@ -85,6 +118,7 @@ class _SwayOverlayState extends State<SwayOverlay> {
 
   @override
   void dispose() {
+    _longPressTimer?.cancel();
     _teardownOverlay();
     super.dispose();
   }
@@ -99,7 +133,7 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   void _initController() {
-    if (kReleaseMode || widget.disabled) return;
+    if (!_modeAllowsOverlay || widget.disabled || _userHidden) return;
 
     if (widget.adapter == null) {
       if (!_missingAdapterReported) {
@@ -108,8 +142,9 @@ class _SwayOverlayState extends State<SwayOverlay> {
           FlutterErrorDetails(
             exception: FlutterError(
               'SwayOverlay requires an adapter when enabled.\n'
-              'Pass SwayFormatAdapter, ManualAdapter, EasyLocalizationAdapter, '
-              'or IntlAdapter — or use SwayOverlay.disabled / disabled: true.',
+              'Pass SwayFormatAdapter, ListenableLocaleAdapter, ManualAdapter, '
+              'EasyLocalizationAdapter, or IntlAdapter — or use '
+              'Sway.debugOverlay / SwayOverlay.disabled.',
             ),
             library: 'sway',
             context: ErrorDescription('while initializing SwayOverlay'),
@@ -130,8 +165,8 @@ class _SwayOverlayState extends State<SwayOverlay> {
           FlutterErrorDetails(
             exception: FlutterError(
               'SwayOverlay could not find an Overlay ancestor.\n'
-              'Place it under MaterialApp (e.g. as home) or wrap MaterialApp '
-              'in an Overlay widget.',
+              'Place it under MaterialApp (e.g. as home), or use '
+              'Sway.debugOverlay under MaterialApp.builder.',
             ),
             library: 'sway',
           ),
@@ -145,10 +180,34 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   void _ensurePosition(Size screen) {
-    _position ??= Offset(
+    if (_position != null) return;
+    final saved = _persistedBubblePosition;
+    if (saved != null) {
+      _position = Offset(
+        saved.dx.clamp(0.0, screen.width - _kBubbleSize),
+        saved.dy.clamp(0.0, screen.height - _kBubbleSize),
+      );
+      return;
+    }
+    _position = Offset(
       screen.width - _kBubbleSize - _kEdgeMargin,
       screen.height - _kBubbleSize - 96,
     );
+  }
+
+  void _persistPosition() {
+    if (_position != null) {
+      _persistedBubblePosition = _position;
+    }
+  }
+
+  void _hideBubble() {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+    _removeList();
+    _userHidden = true;
+    _teardownOverlay();
+    if (mounted) setState(() {});
   }
 
   void _onChanged() {
@@ -182,12 +241,22 @@ class _SwayOverlayState extends State<SwayOverlay> {
 
   void _onPanStart(DragStartDetails details) {
     _dragDistance = 0;
+    _longPressTimer?.cancel();
+    _longPressTimer = Timer(_kLongPressHide, () {
+      if (_dragDistance < _kDragTapSlop && mounted && !_userHidden) {
+        _hideBubble();
+      }
+    });
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
     final screen = MediaQuery.sizeOf(context);
     _ensurePosition(screen);
     _dragDistance += details.delta.distance;
+    if (_dragDistance >= _kDragTapSlop) {
+      _longPressTimer?.cancel();
+      _longPressTimer = null;
+    }
     _position = Offset(
       (_position!.dx + details.delta.dx)
           .clamp(0.0, screen.width - _kBubbleSize),
@@ -198,6 +267,10 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   void _onPanEnd(DragEndDetails details) {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+    if (!mounted || _userHidden || !_active) return;
+
     final screen = MediaQuery.sizeOf(context);
     _ensurePosition(screen);
     final midX = screen.width / 2;
@@ -209,6 +282,7 @@ class _SwayOverlayState extends State<SwayOverlay> {
         screen.height - _kBubbleSize - _kEdgeMargin,
       ),
     );
+    _persistPosition();
     _markOverlayDirty();
 
     if (_dragDistance < _kDragTapSlop) {
@@ -433,7 +507,9 @@ class _SwayOverlayState extends State<SwayOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    if (kReleaseMode || widget.disabled) return widget.child;
+    if (!_modeAllowsOverlay || widget.disabled || _userHidden) {
+      return widget.child;
+    }
     if (_controller == null) return widget.child;
 
     return ForceRebuildScope(
