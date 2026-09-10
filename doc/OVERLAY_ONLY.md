@@ -1,8 +1,10 @@
 # Overlay only (ARB / easy_localization / slang)
 
-Use Sway’s floating locale switcher **without** adopting Sway JSON or codegen.
+Use Sway's floating locale switcher **without** adopting Sway JSON or codegen.
 
 This is the zero-commitment entry point: keep `AppLocalizations`, `easy_localization`, or slang, and add a debug bubble for instant locale + RTL preview.
+
+**Stability (0.2.x):** overlay-only is the supported production path. Full ARB → Sway JSON remains early - evaluate separately.
 
 ## Install
 
@@ -10,15 +12,85 @@ This is the zero-commitment entry point: keep `AppLocalizations`, `easy_localiza
 dart pub add sway
 ```
 
-You only need the overlay + an adapter. You do **not** run `sway:codegen` unless you later migrate.
+You only need the overlay. You do **not** run `sway:codegen` unless you later migrate.
 
-## ARB / gen-l10n
+## Recommended: Stateless app + `MaterialApp.builder`
+
+Most production apps use `onGenerateRoute` / Stacked / GetIt and put chrome in `MaterialApp.builder`. Use `Sway.debugOverlay` - it owns a nested `Overlay` and bridges your locale service:
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // or your gen path
-import 'package:sway/sway.dart';
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    final localeService = locator<AppLocaleService>(); // ChangeNotifier / Listenable
+    return MaterialApp(
+      locale: localeService.locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      onGenerateRoute: /* your router */,
+      builder: (context, child) => Sway.debugOverlay(
+        localeListenable: localeService,
+        getLocale: () => localeService.locale,
+        setLocale: localeService.setLocale,
+        supportedLocales: AppLocalizations.supportedLocales,
+        debugOnly: true, // hide in profile builds
+        child: child!,
+      ),
+    );
+  }
+}
+```
+
+No custom adapter class. No `DebugSwayOverlayHost`. `MainApp` stays Stateless.
+
+### Provider
+
+```dart
+builder: (context, child) {
+  final locale = context.watch<LocaleProvider>();
+  return Sway.debugOverlay(
+    localeListenable: locale,
+    getLocale: () => locale.locale,
+    setLocale: locale.setLocale,
+    supportedLocales: AppLocalizations.supportedLocales,
+    child: child!,
+  );
+},
+```
+
+### Riverpod (`ValueNotifier` / `Notifier`)
+
+Expose a `Listenable` (e.g. `ValueNotifier<Locale>`) from your provider, then:
+
+```dart
+builder: (context, child) {
+  final listenable = ref.watch(localeListenableProvider);
+  return Sway.debugOverlay(
+    localeListenable: listenable,
+    getLocale: () => listenable.value,
+    setLocale: (l) => listenable.value = l,
+    supportedLocales: AppLocalizations.supportedLocales,
+    child: child!,
+  );
+},
+```
+
+### Already have a custom adapter?
+
+```dart
+builder: (context, child) => Sway.debugOverlay(
+  adapter: myAdapter,
+  child: child!,
+),
+```
+
+## Minimal tutorial: StatefulWidget + `home:`
+
+Fine for demos. Prefer the builder path above for production.
+
+```dart
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
   @override
@@ -42,57 +114,40 @@ class _MyAppState extends State<MyApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: SwayOverlay(
         adapter: adapter,
-        // Place under a route that has an Overlay (e.g. MaterialApp.home).
         child: const HomePage(),
       ),
     );
   }
 }
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Text(l10n.helloWorld); // unchanged
-  }
-}
 ```
 
-The overlay calls `adapter.setLocale`, which updates `_locale` and rebuilds `MaterialApp` — your existing gen-l10n strings update as usual.
+`IntlAdapter` keeps its own copy of the locale - it does **not** attach to GetIt by itself. Use `ListenableLocaleAdapter` / `Sway.debugOverlay` for service-owned locale.
 
-## easy_localization
+## Overlay controls
 
-```dart
-late final adapter = EasyLocalizationAdapter(
-  supportedLocales: context.supportedLocales, // or your list
-  currentLocale: context.locale,
-  onLocaleChange: (locale) => context.setLocale(locale),
-);
-```
+| Gesture | Effect |
+|---------|--------|
+| Drag | Move bubble; snaps to left/right edge |
+| Tap | Open locale + Force RTL/LTR panel |
+| Long-press | Hide bubble until hot reload / hot restart |
 
-Wire `SwayOverlay(adapter: adapter, child: …)` the same way. Prefer creating the adapter where you already own locale state so the bubble stays in sync.
+| Flag | Meaning |
+|------|---------|
+| `debugOnly: true` | Show only in debug (`kDebugMode`) |
+| default | Show in debug + profile (`!kReleaseMode`) |
+| `disabled: true` / release | No bubble |
 
-## Custom / slang / anything else
+Bubble edge position is remembered across hot reload in-process (not across a full process kill).
 
-```dart
-late final adapter = ManualAdapter(
-  supportedLocales: const [Locale('en'), Locale('ar')],
-  currentLocale: _locale,
-  onLocaleChange: (locale) => setState(() => _locale = locale),
-);
-```
+## Troubleshooting
 
-## Behavior notes
+| Symptom | Fix |
+|---------|-----|
+| No bubble under `builder` | Use `Sway.debugOverlay`, not bare `SwayOverlay` (needs nested Overlay) |
+| Badge stale after Settings change | Share one listenable owner via `Sway.debugOverlay` / `ListenableLocaleAdapter` |
+| Bubble in profile builds | Pass `debugOnly: true` |
+| "Sway broke my strings" | Remount does not fix `static final` baked translations or forced `textDirection` - fix those in app code |
 
-- Overlay is **debug/profile only** (`kReleaseMode` → no bubble). Use `SwayOverlay.disabled` to hard-off.
-- Drag snaps to the nearest left/right edge.
-- Force RTL / Force LTR preview layout with English (or any) text.
-- Use **one shared adapter** instance for app + overlay so the language badge updates when Settings change locale.
+## easy_localization / slang
 
-## Later: adopt the full format
-
-When you want nested JSON + `context.t`:
-
-1. [MIGRATION.md](MIGRATION.md)
-2. [INTEGRATION.md](INTEGRATION.md)
+Same `Sway.debugOverlay` pattern: point `getLocale` / `setLocale` / `localeListenable` at whatever owns the active locale. Or pass `EasyLocalizationAdapter` / `ManualAdapter` via `adapter:`.

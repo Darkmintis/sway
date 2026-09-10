@@ -127,28 +127,22 @@ Nested keys match your JSON (`profile.editProfile` → `t.profile.editProfile`) 
 
 ## Overlay only (keep ARB / gen-l10n)
 
-You do **not** need Sway JSON to use the floating switcher:
+You do **not** need Sway JSON. For production shells (`MaterialApp.builder` + GetIt / Provider), use the one-liner:
 
 ```dart
-late final adapter = IntlAdapter(
+builder: (context, child) => Sway.debugOverlay(
+  localeListenable: localeService, // ChangeNotifier / Listenable
+  getLocale: () => localeService.locale,
+  setLocale: localeService.setLocale,
   supportedLocales: AppLocalizations.supportedLocales,
-  currentLocale: _locale,
-  onLocaleChange: (l) => setState(() => _locale = l),
-);
-
-MaterialApp(
-  locale: _locale,
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
-  supportedLocales: AppLocalizations.supportedLocales,
-  home: SwayOverlay(
-    adapter: adapter,
-    child: const MyHome(), // still uses AppLocalizations.of(context)
-  ),
-);
+  debugOnly: true,
+  child: child!,
+),
 ```
 
-Also available: `EasyLocalizationAdapter`, `ManualAdapter`.  
-Details: [doc/OVERLAY_ONLY.md](doc/OVERLAY_ONLY.md)
+Long-press the bubble to hide it (hot reload / restart brings it back).
+
+Minimal StatefulWidget + `home:` tutorial and more recipes: [doc/OVERLAY_ONLY.md](doc/OVERLAY_ONLY.md)
 
 ## Migration
 
@@ -204,11 +198,14 @@ Six locales (`en`, `ar`, `es`, `de`, `ja`, `he`), plurals, RTL, and the overlay.
 | Symptom | Fix |
 |---------|-----|
 | `No SwayScope found` | Wrap UI with `SwayScope(translations: …)` |
-| Overlay button missing | Pass an `adapter`; check debug/profile (hidden in release) |
+| Overlay button missing | Pass an adapter / use `Sway.debugOverlay`; check debug/profile (`debugOnly`) |
 | Overlay does not move | Drag the bubble; it snaps to left/right edge on release |
-| Locale badge stale | Use one shared adapter for app + overlay |
+| Locale badge stale | Use `Sway.debugOverlay` or one shared `ListenableLocaleAdapter` |
+| No bubble under `builder` | Use `Sway.debugOverlay` (nested Overlay), not bare `SwayOverlay` |
 | Codegen errors on extra keys | Base locale is schema of truth |
-| Hot restart resets locale | Expected (reload keeps it; restart does not) |
+| Hot restart resets locale | Expected for app locale storage; bubble edge is kept across hot reload |
+| Long-press hid the bubble | Hot reload or hot restart brings it back |
+| Strings look stale after switch | Remount does not fix `static final` baked l10n - fix in app code |
 
 ## License
 
