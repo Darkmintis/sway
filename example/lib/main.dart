@@ -7,7 +7,7 @@ import 'screens/home_screen.dart';
 
 void main() => runApp(const ExampleApp());
 
-/// Brand charcoal — matches Darkmintis mark energy without default M3 blue.
+/// Brand charcoal - matches Darkmintis mark energy without default M3 blue.
 const _brandSeed = Color(0xFF1C1C1C);
 
 class ExampleApp extends StatefulWidget {
@@ -54,15 +54,17 @@ class ExampleAppState extends State<ExampleApp> {
         useMaterial3: true,
         brightness: Brightness.light,
       ),
-      home: SwayScope(
+      // Production-style shell: nested Overlay via Sway.debugOverlay.
+      builder: (context, child) => SwayScope(
         translations: translations,
-        child: SwayOverlay(
+        child: Sway.debugOverlay(
           adapter: adapter,
-          child: HomeScreen(
-            tabIndex: tabIndex,
-            onTabChanged: (i) => setState(() => tabIndex = i),
-          ),
+          child: child ?? const SizedBox.shrink(),
         ),
+      ),
+      home: HomeScreen(
+        tabIndex: tabIndex,
+        onTabChanged: (i) => setState(() => tabIndex = i),
       ),
     );
   }
