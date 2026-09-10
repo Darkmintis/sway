@@ -2,7 +2,7 @@ name: sway
 description: >-
   Type-safe Flutter localization with an instant in-app locale switcher and
   zero-friction migration from ARB, easy_localization, and slang.
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/Darkmintis/sway
 repository: https://github.com/Darkmintis/sway
 issue_tracker: https://github.com/Darkmintis/sway/issues

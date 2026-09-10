@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-09-10
+
+### Added
+
+- `Sway.debugOverlay` - nested Overlay host for `MaterialApp.builder` (no app-owned host).
+- `ListenableLocaleAdapter` - bridge GetIt / ChangeNotifier / ValueNotifier locale owners.
+- `debugOnly` on `SwayOverlay` / `Sway.debugOverlay` - gate on `kDebugMode` (profile can hide the bubble).
+- Long-press the floating button to hide it until hot reload / hot restart.
+- Tap opens the locale panel immediately (no double-tap delay).
+- Bubble edge position remembered across hot reload (process-local).
+- Overlay-only docs rewritten for Stateless + builder as the production default.
+
+### Changed
+
+- Overlay-only is the supported production path in 0.2.x; full ARB → Sway JSON remains early.
+
 ## [0.1.0] - 2026-09-09
 
 ### Added
@@ -23,5 +39,5 @@ All notable changes to this project will be documented in this file.
 ### Known limitations
 
 - No `build_runner` Builder yet (CLI codegen only).
-- easy_localization YAML/CSV migrate requires JSON first (no extra deps in 0.1.0).
+- easy_localization YAML/CSV migrate requires JSON first (no extra deps).
 - Filesystem tooling lives in `package:sway/codegen.dart` (CLI / VM); app import is `package:sway/sway.dart`.
