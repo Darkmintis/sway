@@ -7,7 +7,33 @@ on:
 
 jobs:
   publish:
+    name: Publish to pub.dev
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write # Required for authentication using OIDC
+      id-token: write # OIDC for pub.dev
       contents: read
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same Flutter path as the green CI job.
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Resolve deps BEFORE OIDC token is registered. setup-dart injects a
+      # PUB_TOKEN that has been known to 401 public archive downloads
+      # (dart-lang/pub-dev#7623-style failures), which breaks `pub get`.
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Setup Dart OIDC
+        uses: dart-lang/setup-dart@v1
+
+      - name: Publish dry-run
+        run: flutter pub publish --dry-run
+
+      - name: Publish
+        run: flutter pub publish --force
