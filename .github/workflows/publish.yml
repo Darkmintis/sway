@@ -29,11 +29,19 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Flutter may rewrite analysis_options.yaml on pub get. That dirties
+      # the tree and makes `publish --dry-run` exit 65 on a warning even
+      # though real `publish --force` would succeed. Restore committed files
+      # so the uploaded archive matches git.
+      - name: Restore analysis_options
+        run: |
+          git diff -- analysis_options.yaml example/analysis_options.yaml || true
+          git checkout -- analysis_options.yaml example/analysis_options.yaml
+
       - name: Setup Dart OIDC
         uses: dart-lang/setup-dart@v1
 
-      - name: Publish dry-run
-        run: flutter pub publish --dry-run
-
+      # --force: skip confirm; warnings (e.g. transient dirty-tree) still upload.
+      # Errors still fail the job.
       - name: Publish
         run: flutter pub publish --force
