@@ -143,3 +143,49 @@ class ManualAdapter extends SwayLocaleAdapter {
     notifyListeners();
   }
 }
+
+/// Bridges an existing listenable locale owner (GetIt service, ChangeNotifier,
+/// ValueNotifier, etc.) into [SwayOverlay] without a hand-rolled adapter class.
+///
+/// Listens to [localeListenable] so Settings → bubble badge stays in sync.
+class ListenableLocaleAdapter extends SwayLocaleAdapter {
+  /// External locale owner that notifies when locale changes.
+  final Listenable localeListenable;
+
+  /// Reads the current locale from the host app.
+  final Locale Function() getLocale;
+
+  /// Writes a new locale into the host app.
+  final void Function(Locale locale) _setLocale;
+
+  @override
+  final List<Locale> supportedLocales;
+
+  /// Creates a [ListenableLocaleAdapter].
+  ListenableLocaleAdapter({
+    required this.localeListenable,
+    required this.getLocale,
+    required void Function(Locale locale) setLocale,
+    required this.supportedLocales,
+  }) : _setLocale = setLocale {
+    localeListenable.addListener(_onExternalChange);
+  }
+
+  void _onExternalChange() => notifyListeners();
+
+  @override
+  Locale get currentLocale => getLocale();
+
+  @override
+  void setLocale(Locale locale) {
+    if (getLocale() == locale) return;
+    _setLocale(locale);
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    localeListenable.removeListener(_onExternalChange);
+    super.dispose();
+  }
+}
