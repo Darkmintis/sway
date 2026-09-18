@@ -16,6 +16,10 @@ const double _kPanelWidth = 200;
 const double _kDragTapSlop = 8;
 const Duration _kLongPressHide = Duration(milliseconds: 450);
 
+/// Default Y: fraction from vertical-center toward the bottom safe edge.
+/// Keeps the bubble in the lower-middle band (below Ferret, above the lip).
+const double _kDefaultLowerBand = 0.55;
+
 /// ponytail: process-local only (survives hot reload, not process kill).
 /// Upgrade: shared_preferences if QA needs cross-process restore.
 Offset? _persistedBubblePosition;
@@ -191,8 +195,14 @@ class _SwayOverlayState extends State<SwayOverlay> {
     }
     _position = Offset(
       screen.width - _kBubbleSize - _kEdgeMargin,
-      screen.height - _kBubbleSize - 96,
+      _defaultLowerMidTop(screen),
     );
+  }
+
+  double _defaultLowerMidTop(Size screen) {
+    final center = (screen.height - _kBubbleSize) / 2;
+    final bottom = screen.height - _kBubbleSize - _kEdgeMargin;
+    return center + (bottom - center) * _kDefaultLowerBand;
   }
 
   void _persistPosition() {
