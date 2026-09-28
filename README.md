@@ -135,12 +135,19 @@ builder: (context, child) => Sway.debugOverlay(
   getLocale: () => localeService.locale,
   setLocale: localeService.setLocale,
   supportedLocales: AppLocalizations.supportedLocales,
-  debugOnly: true,
   child: child!,
 ),
 ```
 
 Long-press the bubble to hide it (hot reload / restart brings it back).
+
+On in debug and profile, off in release. Same switches as Mole and Ferret:
+
+| Flag | Effect |
+|------|--------|
+| `enabled: false` | Off in every build |
+| `enableInRelease: true` | Also on in release, with a red `SWAY ACTIVE` tag and a console banner |
+| `debugOnly: true` | Debug builds only (hides in profile) |
 
 Minimal StatefulWidget + `home:` tutorial and more recipes: [doc/OVERLAY_ONLY.md](doc/OVERLAY_ONLY.md)
 
@@ -198,7 +205,7 @@ Six locales (`en`, `ar`, `es`, `de`, `ja`, `he`), plurals, RTL, and the overlay.
 | Symptom | Fix |
 |---------|-----|
 | `No SwayScope found` | Wrap UI with `SwayScope(translations: …)` |
-| Overlay button missing | Pass an adapter / use `Sway.debugOverlay`; check debug/profile (`debugOnly`) |
+| Overlay button missing | Pass an adapter / use `Sway.debugOverlay`; check `enabled`, `debugOnly`, and `enableInRelease` for release builds |
 | Overlay does not move | Drag the bubble; it snaps to left/right edge on release |
 | Locale badge stale | Use `Sway.debugOverlay` or one shared `ListenableLocaleAdapter` |
 | No bubble under `builder` | Use `Sway.debugOverlay` (nested Overlay), not bare `SwayOverlay` |

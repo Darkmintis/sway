@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-09-28
+
+### Added
+
+- `enabled` and `enableInRelease` on `SwayOverlay` and `Sway.debugOverlay`,
+  matching Mole and Ferret so one app flag can drive all three packages.
+- Release builds can now run the overlay when `enableInRelease: true`. A red
+  `SWAY ACTIVE` tag sits above the bubble and a console banner prints once.
+
+### Changed
+
+- The floating button now parks in the lower-middle band by default.
+
+### Deprecated
+
+- `disabled` on `SwayOverlay` / `Sway.debugOverlay`. Use `enabled: false`.
+  `SwayOverlay.disabled(...)` is still supported.
+
 ## [0.2.0] - 2026-09-10
 
 ### Added
