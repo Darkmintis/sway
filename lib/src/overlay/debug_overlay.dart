@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'locale_adapter.dart';
+import 'sway_activation.dart';
 import 'sway_overlay.dart';
 
 /// Namespace for Sway convenience APIs.
@@ -30,6 +31,9 @@ class Sway {
   ///
   /// Pass [adapter] to use a custom [SwayLocaleAdapter] instead of building a
   /// [ListenableLocaleAdapter] from the get/set/listenable args.
+  ///
+  /// [enabled] is the master switch. Release builds stay off unless
+  /// [enableInRelease] is `true` (red `SWAY ACTIVE` tag + console banner).
   static Widget debugOverlay({
     Key? key,
     required Widget child,
@@ -38,7 +42,10 @@ class Sway {
     void Function(Locale locale)? setLocale,
     List<Locale>? supportedLocales,
     SwayLocaleAdapter? adapter,
+    bool enabled = true,
+    bool enableInRelease = false,
     bool debugOnly = false,
+    @Deprecated('Use enabled: false. Will be removed in 1.0.0.')
     bool disabled = false,
   }) {
     assert(
@@ -51,8 +58,13 @@ class Sway {
       'localeListenable + getLocale + setLocale + supportedLocales.',
     );
 
-    if (kReleaseMode || disabled) return child;
-    if (debugOnly && !kDebugMode) return child;
+    final isEnabled = enabled && !disabled;
+    final activation = SwayActivation.resolve(
+      enabled: isEnabled,
+      enableInRelease: enableInRelease,
+      debugOnly: debugOnly,
+    );
+    if (!activation.active) return child;
 
     return _SwayDebugOverlayHost(
       key: key,
@@ -61,8 +73,8 @@ class Sway {
       setLocale: setLocale,
       supportedLocales: supportedLocales,
       adapter: adapter,
+      enableInRelease: enableInRelease,
       debugOnly: debugOnly,
-      disabled: disabled,
       child: child,
     );
   }
@@ -75,8 +87,8 @@ class _SwayDebugOverlayHost extends StatefulWidget {
   final void Function(Locale locale)? setLocale;
   final List<Locale>? supportedLocales;
   final SwayLocaleAdapter? adapter;
+  final bool enableInRelease;
   final bool debugOnly;
-  final bool disabled;
 
   const _SwayDebugOverlayHost({
     super.key,
@@ -86,8 +98,8 @@ class _SwayDebugOverlayHost extends StatefulWidget {
     this.setLocale,
     this.supportedLocales,
     this.adapter,
+    required this.enableInRelease,
     required this.debugOnly,
-    required this.disabled,
   });
 
   @override
@@ -139,8 +151,8 @@ class _SwayDebugOverlayHostState extends State<_SwayDebugOverlayHost> {
   Widget _buildEntry(BuildContext context) {
     return SwayOverlay(
       adapter: _adapter,
+      enableInRelease: widget.enableInRelease,
       debugOnly: widget.debugOnly,
-      disabled: widget.disabled,
       child: widget.child,
     );
   }

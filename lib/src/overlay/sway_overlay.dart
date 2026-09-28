@@ -2,13 +2,13 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/locale_meta.dart';
 import 'force_rebuild_scope.dart';
 import 'locale_adapter.dart';
 import 'overlay_controller.dart';
+import 'sway_activation.dart';
 
 const double _kBubbleSize = 48;
 const double _kEdgeMargin = 8;
@@ -31,8 +31,10 @@ Offset? _persistedBubblePosition;
 /// Long-press hides the bubble until hot reload / hot restart.
 /// Includes Force RTL / Force LTR preview toggles.
 ///
-/// Active in debug and profile by default (`!kReleaseMode`). Pass
-/// [debugOnly] to show only in debug builds.
+/// Active in debug and profile by default. Off in release builds unless
+/// [enableInRelease] is `true`, in which case a red `SWAY ACTIVE` tag and a
+/// console banner make it obvious. [enabled] is the master switch.
+/// Pass [debugOnly] to also hide the bubble in profile builds.
 class SwayOverlay extends StatefulWidget {
   /// The child widget tree. Typically wraps content under a [MaterialApp]
   /// route so an [Overlay] ancestor exists, or use `Sway.debugOverlay` under
@@ -45,11 +47,19 @@ class SwayOverlay extends StatefulWidget {
   /// a clear [FlutterError] instead of rendering a silent no-op.
   final SwayLocaleAdapter? adapter;
 
+  /// Master switch. `false` renders no button in any build mode.
+  final bool enabled;
+
+  /// Opt in to release builds. Shows a red `SWAY ACTIVE` tag and prints a
+  /// console banner so it can't ship to users by accident.
+  final bool enableInRelease;
+
   /// Whether the overlay is completely disabled (no button rendered).
+  @Deprecated('Use enabled: false. Will be removed in 1.0.0.')
   final bool disabled;
 
-  /// When true, show only in debug builds (`kDebugMode`). When false (default),
-  /// show in debug and profile (`!kReleaseMode`) for back-compat with 0.1.0.
+  /// When true, show only in debug builds (`kDebugMode`), hiding the bubble
+  /// in profile (and release) builds.
   final bool debugOnly;
 
   /// Creates a [SwayOverlay].
@@ -57,15 +67,18 @@ class SwayOverlay extends StatefulWidget {
     super.key,
     required this.child,
     this.adapter,
+    this.enabled = true,
+    this.enableInRelease = false,
+    @Deprecated('Use enabled: false. Will be removed in 1.0.0.')
     this.disabled = false,
     this.debugOnly = false,
   });
 
   /// Creates a disabled [SwayOverlay] (no button rendered).
-  const SwayOverlay.disabled({
-    super.key,
-    required this.child,
-  })  : adapter = null,
+  const SwayOverlay.disabled({super.key, required this.child})
+      : adapter = null,
+        enabled = false,
+        enableInRelease = false,
         disabled = true,
         debugOnly = false;
 
@@ -84,13 +97,17 @@ class _SwayOverlayState extends State<SwayOverlay> {
   bool _userHidden = false;
   Timer? _longPressTimer;
 
-  bool get _modeAllowsOverlay => widget.debugOnly ? kDebugMode : !kReleaseMode;
+  SwayActivation get _activation => SwayActivation.resolve(
+        // ignore: deprecated_member_use_from_same_package
+        enabled: widget.enabled && !widget.disabled,
+        enableInRelease: widget.enableInRelease,
+        debugOnly: widget.debugOnly,
+      );
+
+  bool get _modeAllowsOverlay => _activation.active;
 
   bool get _active =>
-      _modeAllowsOverlay &&
-      !widget.disabled &&
-      widget.adapter != null &&
-      !_userHidden;
+      _modeAllowsOverlay && widget.adapter != null && !_userHidden;
 
   @override
   void initState() {
@@ -113,6 +130,9 @@ class _SwayOverlayState extends State<SwayOverlay> {
   void didUpdateWidget(SwayOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.adapter != oldWidget.adapter ||
+        widget.enabled != oldWidget.enabled ||
+        widget.enableInRelease != oldWidget.enableInRelease ||
+        // ignore: deprecated_member_use_from_same_package
         widget.disabled != oldWidget.disabled ||
         widget.debugOnly != oldWidget.debugOnly) {
       _teardownOverlay();
@@ -137,7 +157,10 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   void _initController() {
-    if (!_modeAllowsOverlay || widget.disabled || _userHidden) return;
+    if (!_modeAllowsOverlay || _userHidden) return;
+    if (_activation.showReleaseWarning) {
+      SwayActivation.printReleaseWarningOnce();
+    }
 
     if (widget.adapter == null) {
       if (!_missingAdapterReported) {
@@ -268,10 +291,14 @@ class _SwayOverlayState extends State<SwayOverlay> {
       _longPressTimer = null;
     }
     _position = Offset(
-      (_position!.dx + details.delta.dx)
-          .clamp(0.0, screen.width - _kBubbleSize),
-      (_position!.dy + details.delta.dy)
-          .clamp(0.0, screen.height - _kBubbleSize),
+      (_position!.dx + details.delta.dx).clamp(
+        0.0,
+        screen.width - _kBubbleSize,
+      ),
+      (_position!.dy + details.delta.dy).clamp(
+        0.0,
+        screen.height - _kBubbleSize,
+      ),
     );
     _markOverlayDirty();
   }
@@ -306,56 +333,74 @@ class _SwayOverlayState extends State<SwayOverlay> {
     final theme = Theme.of(context);
     final locale = _controller?.currentLocale;
     final code = (locale?.languageCode ?? '?').toUpperCase();
+    final left = _position!.dx.clamp(0.0, screen.width - _kBubbleSize);
+    final onLeftHalf = left + _kBubbleSize / 2 < screen.width / 2;
 
     return Positioned(
-      left: _position!.dx.clamp(0.0, screen.width - _kBubbleSize),
+      left: left,
       top: _position!.dy.clamp(0.0, screen.height - _kBubbleSize),
-      child: Material(
-        elevation: 6,
-        shadowColor: Colors.black54,
-        shape: const CircleBorder(),
-        color: theme.colorScheme.primary,
-        child: SizedBox(
-          width: _kBubbleSize,
-          height: _kBubbleSize,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onPanStart: _onPanStart,
-            onPanUpdate: _onPanUpdate,
-            onPanEnd: _onPanEnd,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.translate_rounded,
-                  size: 22,
-                  color: theme.colorScheme.onPrimary,
-                ),
-                Positioned(
-                  right: 4,
-                  bottom: 4,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 3,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onPrimary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      code.length > 2 ? code.substring(0, 2) : code,
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                        height: 1,
-                        color: theme.colorScheme.primary,
-                      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          _buildBubble(theme, code),
+          if (_activation.showReleaseWarning)
+            Positioned(
+              bottom: _kBubbleSize + 6,
+              left: onLeftHalf ? 0 : null,
+              right: onLeftHalf ? null : 0,
+              child: const _ReleaseTag(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBubble(ThemeData theme, String code) {
+    return Material(
+      elevation: 6,
+      shadowColor: Colors.black54,
+      shape: const CircleBorder(),
+      color: theme.colorScheme.primary,
+      child: SizedBox(
+        width: _kBubbleSize,
+        height: _kBubbleSize,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanStart: _onPanStart,
+          onPanUpdate: _onPanUpdate,
+          onPanEnd: _onPanEnd,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                Icons.translate_rounded,
+                size: 22,
+                color: theme.colorScheme.onPrimary,
+              ),
+              Positioned(
+                right: 4,
+                bottom: 4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onPrimary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    code.length > 2 ? code.substring(0, 2) : code,
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -369,9 +414,9 @@ class _SwayOverlayState extends State<SwayOverlay> {
     final filtered = _searchQuery.isEmpty
         ? locales
         : locales.where((l) {
-            final name = SwayLocaleMeta.fromLanguageCode(l.languageCode)
-                .displayName
-                .toLowerCase();
+            final name = SwayLocaleMeta.fromLanguageCode(
+              l.languageCode,
+            ).displayName.toLowerCase();
             final q = _searchQuery.toLowerCase();
             return name.contains(q) || l.languageCode.contains(q);
           }).toList();
@@ -382,14 +427,20 @@ class _SwayOverlayState extends State<SwayOverlay> {
         (filtered.length * 48.0).clamp(48.0, screen.height * 0.35) +
         8;
 
-    final listLeft = (_position!.dx)
-        .clamp(_kEdgeMargin, screen.width - _kPanelWidth - _kEdgeMargin);
+    final listLeft = (_position!.dx).clamp(
+      _kEdgeMargin,
+      screen.width - _kPanelWidth - _kEdgeMargin,
+    );
     final preferAbove = _position!.dy > panelHeight + 16;
     final listTop = preferAbove
-        ? (_position!.dy - 8 - panelHeight)
-            .clamp(_kEdgeMargin, screen.height - panelHeight - _kEdgeMargin)
-        : (_position!.dy + _kBubbleSize + 8)
-            .clamp(_kEdgeMargin, screen.height - panelHeight - _kEdgeMargin);
+        ? (_position!.dy - 8 - panelHeight).clamp(
+            _kEdgeMargin,
+            screen.height - panelHeight - _kEdgeMargin,
+          )
+        : (_position!.dy + _kBubbleSize + 8).clamp(
+            _kEdgeMargin,
+            screen.height - panelHeight - _kEdgeMargin,
+          );
 
     final theme = Theme.of(context);
 
@@ -517,9 +568,7 @@ class _SwayOverlayState extends State<SwayOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_modeAllowsOverlay || widget.disabled || _userHidden) {
-      return widget.child;
-    }
+    if (!_modeAllowsOverlay || _userHidden) return widget.child;
     if (_controller == null) return widget.child;
 
     return ForceRebuildScope(
@@ -527,6 +576,32 @@ class _SwayOverlayState extends State<SwayOverlay> {
       forceRtl: _controller!.forceRtl,
       forceLtr: _controller!.forceLtr,
       child: widget.child,
+    );
+  }
+}
+
+class _ReleaseTag extends StatelessWidget {
+  const _ReleaseTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFB3261E),
+      borderRadius: BorderRadius.circular(6),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          'SWAY ACTIVE',
+          maxLines: 1,
+          softWrap: false,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.4,
+          ),
+        ),
+      ),
     );
   }
 }
