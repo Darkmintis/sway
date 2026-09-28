@@ -14,8 +14,9 @@ class _LocaleService extends ChangeNotifier {
 }
 
 void main() {
-  testWidgets('Sway.debugOverlay under MaterialApp.builder shows bubble',
-      (tester) async {
+  testWidgets('Sway.debugOverlay under MaterialApp.builder shows bubble', (
+    tester,
+  ) async {
     final service = _LocaleService(const Locale('en'));
 
     await tester.pumpWidget(
@@ -38,8 +39,9 @@ void main() {
     expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
   });
 
-  testWidgets('ListenableLocaleAdapter syncs badge when service notifies',
-      (tester) async {
+  testWidgets('ListenableLocaleAdapter syncs badge when service notifies', (
+    tester,
+  ) async {
     final service = _LocaleService(const Locale('en'));
     final adapter = ListenableLocaleAdapter(
       localeListenable: service,
@@ -95,8 +97,9 @@ void main() {
     expect(find.byIcon(Icons.translate_rounded), findsNothing);
   });
 
-  testWidgets('debugOnly still shows bubble in debug test environment',
-      (tester) async {
+  testWidgets('debugOnly still shows bubble in debug test environment', (
+    tester,
+  ) async {
     final adapter = ManualAdapter(
       supportedLocales: const [Locale('en')],
       currentLocale: const Locale('en'),
@@ -116,9 +119,30 @@ void main() {
     expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
   });
 
-  test('SwayOverlay.debugOnly defaults to false', () {
+  test('SwayOverlay.disabled turns the master switch off', () {
     const w = SwayOverlay.disabled(child: SizedBox());
     expect(w.debugOnly, isFalse);
-    expect(w.disabled, isTrue);
+    expect(w.enabled, isFalse);
+    expect(w.enableInRelease, isFalse);
+  });
+
+  testWidgets('enabled: false renders no bubble', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => Sway.debugOverlay(
+          adapter: ManualAdapter(
+            supportedLocales: const [Locale('en')],
+            currentLocale: const Locale('en'),
+            onLocaleChange: (_) {},
+          ),
+          enabled: false,
+          child: child!,
+        ),
+        home: const Scaffold(body: Text('home')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+    expect(find.byIcon(Icons.translate_rounded), findsNothing);
   });
 }

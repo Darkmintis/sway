@@ -9,9 +9,7 @@ void main() {
   testWidgets('disabled overlay renders no floating button', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: SwayOverlay.disabled(
-          child: Scaffold(body: Text('hello')),
-        ),
+        home: SwayOverlay.disabled(child: Scaffold(body: Text('hello'))),
       ),
     );
     expect(find.byIcon(Icons.translate_rounded), findsNothing);
@@ -40,8 +38,9 @@ void main() {
     expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
   });
 
-  testWidgets('drag updates bubble position then snaps to edge',
-      (tester) async {
+  testWidgets('drag updates bubble position then snaps to edge', (
+    tester,
+  ) async {
     final adapter = SwayFormatAdapter(
       supportedLocales: const [Locale('en'), Locale('ar')],
       currentLocale: const Locale('en'),
@@ -128,7 +127,10 @@ void main() {
     // Simulate a tap via tiny pan (below slop) ending.
     final button = find.byIcon(Icons.translate_rounded);
     await tester.timedDrag(
-        button, const Offset(2, 0), const Duration(milliseconds: 50));
+      button,
+      const Offset(2, 0),
+      const Duration(milliseconds: 50),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Force RTL'), findsOneWidget);
@@ -136,8 +138,9 @@ void main() {
     expect(find.text('English'), findsOneWidget);
   });
 
-  testWidgets('bubble badge follows app locale changes via adapter',
-      (tester) async {
+  testWidgets('bubble badge follows app locale changes via adapter', (
+    tester,
+  ) async {
     final adapter = SwayFormatAdapter(
       supportedLocales: const [Locale('en'), Locale('ar')],
       currentLocale: const Locale('en'),
@@ -166,7 +169,7 @@ void main() {
   test('debugDisabled skips overlay when disabled flag set', () {
     // Compile-time sanity: disabled constructor sets adapter null.
     const w = SwayOverlay.disabled(child: SizedBox());
-    expect(w.disabled, isTrue);
+    expect(w.enabled, isFalse);
     expect(w.adapter, isNull);
   });
 
