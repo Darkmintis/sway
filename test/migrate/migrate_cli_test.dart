@@ -15,8 +15,12 @@ void main() {
   group('migrate CLI', () {
     test('ARB converts ICU plurals to objects and flags select', () async {
       final out = Directory(
-        p.join(root, 'test', 'migrate',
-            'out_arb_${DateTime.now().microsecondsSinceEpoch}'),
+        p.join(
+          root,
+          'test',
+          'migrate',
+          'out_arb_${DateTime.now().microsecondsSinceEpoch}',
+        ),
       )..createSync();
       addTearDown(() {
         if (out.existsSync()) out.deleteSync(recursive: true);
@@ -50,8 +54,12 @@ void main() {
 
     test('easy_localization converts positional placeholders', () async {
       final out = Directory(
-        p.join(root, 'test', 'migrate',
-            'out_easy_${DateTime.now().microsecondsSinceEpoch}'),
+        p.join(
+          root,
+          'test',
+          'migrate',
+          'out_easy_${DateTime.now().microsecondsSinceEpoch}',
+        ),
       )..createSync();
       addTearDown(() {
         if (out.existsSync()) out.deleteSync(recursive: true);
@@ -67,9 +75,9 @@ void main() {
       ]);
 
       expect(result.exitCode, 0, reason: result.stderr.toString());
-      final data = json.decode(
-        File(p.join(out.path, 'en.sway.json')).readAsStringSync(),
-      ) as Map<String, dynamic>;
+      final data =
+          json.decode(File(p.join(out.path, 'en.sway.json')).readAsStringSync())
+              as Map<String, dynamic>;
       final home = data['home'] as Map<String, dynamic>;
       final items = data['items'] as Map<String, dynamic>;
       expect(home['welcome'], 'Hello, {arg1}!');
@@ -78,8 +86,12 @@ void main() {
 
     test('slang converts \$name to {name}', () async {
       final out = Directory(
-        p.join(root, 'test', 'migrate',
-            'out_slang_${DateTime.now().microsecondsSinceEpoch}'),
+        p.join(
+          root,
+          'test',
+          'migrate',
+          'out_slang_${DateTime.now().microsecondsSinceEpoch}',
+        ),
       )..createSync();
       addTearDown(() {
         if (out.existsSync()) out.deleteSync(recursive: true);
@@ -95,9 +107,9 @@ void main() {
       ]);
 
       expect(result.exitCode, 0, reason: result.stderr.toString());
-      final data = json.decode(
-        File(p.join(out.path, 'en.sway.json')).readAsStringSync(),
-      ) as Map<String, dynamic>;
+      final data =
+          json.decode(File(p.join(out.path, 'en.sway.json')).readAsStringSync())
+              as Map<String, dynamic>;
       final home = data['home'] as Map<String, dynamic>;
       final items = data['items'] as Map<String, dynamic>;
       expect(home['welcome'], 'Hello, {name}!');
@@ -106,8 +118,12 @@ void main() {
 
     test('dry-run does not write files', () async {
       final out = Directory(
-        p.join(root, 'test', 'migrate',
-            'out_dry_${DateTime.now().microsecondsSinceEpoch}'),
+        p.join(
+          root,
+          'test',
+          'migrate',
+          'out_dry_${DateTime.now().microsecondsSinceEpoch}',
+        ),
       );
 
       final result = await runMigrate([
@@ -126,8 +142,12 @@ void main() {
 
     test('refuses non-empty output without --force', () async {
       final out = Directory(
-        p.join(root, 'test', 'migrate',
-            'out_force_${DateTime.now().microsecondsSinceEpoch}'),
+        p.join(
+          root,
+          'test',
+          'migrate',
+          'out_force_${DateTime.now().microsecondsSinceEpoch}',
+        ),
       )..createSync();
       addTearDown(() {
         if (out.existsSync()) out.deleteSync(recursive: true);
@@ -144,8 +164,10 @@ void main() {
       ]);
 
       expect(result.exitCode, isNot(0));
-      expect(result.stdout.toString() + result.stderr.toString(),
-          contains('--force'));
+      expect(
+        result.stdout.toString() + result.stderr.toString(),
+        contains('--force'),
+      );
     });
   });
 }

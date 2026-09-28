@@ -75,10 +75,7 @@ void main() {
       final files = [
         const ParsedLocaleFile(
           languageCode: 'en',
-          data: {
-            '123invalid': 'value',
-            'valid-key': 'value',
-          },
+          data: {'123invalid': 'value', 'valid-key': 'value'},
           filePath: 'en.sway.json',
         ),
       ];
@@ -113,10 +110,7 @@ void main() {
         const ParsedLocaleFile(
           languageCode: 'en',
           data: {
-            'items': {
-              'one': '{count} item',
-              'other': '{count} items',
-            },
+            'items': {'one': '{count} item', 'other': '{count} items'},
           },
           filePath: 'en.sway.json',
         ),
@@ -129,16 +123,12 @@ void main() {
       final files = [
         const ParsedLocaleFile(
           languageCode: 'en',
-          data: {
-            'greeting': 'Hello, {name}!',
-          },
+          data: {'greeting': 'Hello, {name}!'},
           filePath: 'en.sway.json',
         ),
         const ParsedLocaleFile(
           languageCode: 'fr',
-          data: {
-            'greeting': 'Bonjour!',
-          },
+          data: {'greeting': 'Bonjour!'},
           filePath: 'fr.sway.json',
         ),
       ];

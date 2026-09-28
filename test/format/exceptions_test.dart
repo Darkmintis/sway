@@ -33,11 +33,7 @@ void main() {
     });
 
     test('toString includes line and column', () {
-      const ex = SwayJsonParseException(
-        'trailing comma',
-        line: 5,
-        column: 12,
-      );
+      const ex = SwayJsonParseException('trailing comma', line: 5, column: 12);
       expect(ex.toString(), contains('line 5'));
       expect(ex.toString(), contains('column 12'));
     });

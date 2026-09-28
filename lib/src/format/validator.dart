@@ -216,7 +216,8 @@ class SwayValidator {
       }
       if (entry.value is Map<String, dynamic>) {
         invalid.addAll(
-            _findInvalidKeys(entry.value as Map<String, dynamic>, fullPath));
+          _findInvalidKeys(entry.value as Map<String, dynamic>, fullPath),
+        );
       }
     }
     return invalid;
@@ -224,8 +225,10 @@ class SwayValidator {
 
   /// Flattens nested map keys into dot-separated paths.
   /// Plural category objects are treated as a single leaf key.
-  static Set<String> _flattenKeys(Map<String, dynamic> data,
-      [String prefix = '']) {
+  static Set<String> _flattenKeys(
+    Map<String, dynamic> data, [
+    String prefix = '',
+  ]) {
     final keys = <String>{};
     for (final entry in data.entries) {
       final fullPath = prefix.isEmpty ? entry.key : '$prefix.${entry.key}';
@@ -269,10 +272,9 @@ class SwayValidator {
 
   /// Extracts `{placeholder}` names from a string.
   static Set<String> _extractPlaceholders(String value) {
-    return RegExp(r'\{(\w+)\}')
-        .allMatches(value)
-        .map((m) => m.group(1)!)
-        .toSet();
+    return RegExp(
+      r'\{(\w+)\}',
+    ).allMatches(value).map((m) => m.group(1)!).toSet();
   }
 }
 

@@ -31,10 +31,7 @@ class ParsedLocaleFile {
   factory ParsedLocaleFile.load(String path) {
     final file = File(path);
     if (!file.existsSync()) {
-      throw SwayJsonParseException(
-        'Locale file not found',
-        filePath: path,
-      );
+      throw SwayJsonParseException('Locale file not found', filePath: path);
     }
 
     String content;
@@ -69,10 +66,7 @@ class ParsedLocaleFile {
       }
       return decoded;
     } on FormatException catch (e) {
-      throw SwayJsonParseException(
-        e.message,
-        filePath: filePath,
-      );
+      throw SwayJsonParseException(e.message, filePath: filePath);
     }
   }
 

@@ -56,13 +56,13 @@ const Map<String, Set<PluralCategory>> _categories = {
     PluralCategory.one,
     PluralCategory.few,
     PluralCategory.many,
-    PluralCategory.other
+    PluralCategory.other,
   },
   'pl': {
     PluralCategory.one,
     PluralCategory.few,
     PluralCategory.many,
-    PluralCategory.other
+    PluralCategory.other,
   },
   'ar': {
     PluralCategory.zero,

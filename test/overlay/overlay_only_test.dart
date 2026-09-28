@@ -6,8 +6,9 @@ import 'package:sway/sway.dart';
 /// Proves overlay-only usage: keep ARB/gen-l10n (or any system) and only
 /// wire [IntlAdapter] + [SwayOverlay] — no Sway JSON / codegen required.
 void main() {
-  testWidgets('overlay-only with IntlAdapter switches app locale',
-      (tester) async {
+  testWidgets('overlay-only with IntlAdapter switches app locale', (
+    tester,
+  ) async {
     var locale = const Locale('en');
     final adapter = IntlAdapter(
       supportedLocales: const [Locale('en'), Locale('ar')],

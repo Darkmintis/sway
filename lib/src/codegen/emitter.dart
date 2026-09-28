@@ -185,12 +185,11 @@ class SwayEmitter {
     buffer.writeln('    }');
     buffer.writeln('  }');
     buffer.writeln();
-    buffer.writeln(
-      '  /// Flutter-style lookup from the nearest [SwayScope].',
-    );
+    buffer.writeln('  /// Flutter-style lookup from the nearest [SwayScope].');
     buffer.writeln('  ///');
-    buffer
-        .writeln('  /// Prefer shorthand: `context.t.home.welcome(name: …)`.');
+    buffer.writeln(
+      '  /// Prefer shorthand: `context.t.home.welcome(name: …)`.',
+    );
     buffer.writeln(
       '  static SwayTranslations of(BuildContext context) => SwayScope.of(context);',
     );
@@ -238,27 +237,22 @@ class SwayEmitter {
     buffer.writeln('  }');
     buffer.writeln();
     buffer.writeln('  @override');
-    buffer.writeln(
-      '  bool updateShouldNotify(SwayScope oldWidget) =>',
-    );
+    buffer.writeln('  bool updateShouldNotify(SwayScope oldWidget) =>');
     buffer.writeln(
       '      translations.locale != oldWidget.translations.locale ||',
     );
-    buffer.writeln(
-      '      !identical(translations, oldWidget.translations);',
-    );
+    buffer.writeln('      !identical(translations, oldWidget.translations);');
     buffer.writeln('}');
     buffer.writeln();
     buffer.writeln('/// Shorthand accessors for generated translations.');
     buffer.writeln('extension SwayTranslationsX on BuildContext {');
     buffer.writeln(
-        '  /// Shorthand: `context.t.home.welcome(name: \'Dipesh\')`.');
+      '  /// Shorthand: `context.t.home.welcome(name: \'Dipesh\')`.',
+    );
     buffer.writeln('  SwayTranslations get t => SwayTranslations.of(this);');
     buffer.writeln();
     buffer.writeln('  /// Longhand alias of [t].');
-    buffer.writeln(
-      '  SwayTranslations get sway => SwayTranslations.of(this);',
-    );
+    buffer.writeln('  SwayTranslations get sway => SwayTranslations.of(this);');
     buffer.writeln('}');
   }
 
@@ -324,15 +318,7 @@ class SwayEmitter {
     final suffix = _toSuffix(file.languageCode);
     final isRtl = isRtlLanguage(file.languageCode);
 
-    _emitImplTree(
-      buffer,
-      file,
-      config,
-      file.data,
-      base.data,
-      '',
-      suffix,
-    );
+    _emitImplTree(buffer, file, config, file.data, base.data, '', suffix);
 
     buffer.writeln('/// Sway translations for locale: ${file.languageCode}');
     buffer.writeln('class SwayTranslations$suffix extends SwayTranslations {');
@@ -348,15 +334,7 @@ class SwayEmitter {
     buffer.writeln('  bool get isRtl => $isRtl;');
     buffer.writeln();
 
-    _emitImplMembers(
-      buffer,
-      file,
-      config,
-      file.data,
-      base.data,
-      '',
-      suffix,
-    );
+    _emitImplMembers(buffer, file, config, file.data, base.data, '', suffix);
 
     buffer.writeln('}');
     buffer.writeln();
@@ -455,11 +433,7 @@ class SwayEmitter {
     }
   }
 
-  static void _emitImplString(
-    StringBuffer buffer,
-    String key,
-    String value,
-  ) {
+  static void _emitImplString(StringBuffer buffer, String key, String value) {
     final placeholders = _placeholders(value);
     buffer.writeln('  @override');
     if (placeholders.isEmpty) {
@@ -543,10 +517,9 @@ class SwayEmitter {
   }
 
   static Set<String> _placeholders(String value) {
-    return RegExp(r'\{(\w+)\}')
-        .allMatches(value)
-        .map((m) => m.group(1)!)
-        .toSet();
+    return RegExp(
+      r'\{(\w+)\}',
+    ).allMatches(value).map((m) => m.group(1)!).toSet();
   }
 
   static String _paramList(Set<String> placeholders) {
