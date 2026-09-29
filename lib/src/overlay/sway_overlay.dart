@@ -11,7 +11,7 @@ import 'overlay_controller.dart';
 import 'sway_activation.dart';
 
 const double _kBubbleSize = 48;
-const double _kEdgeMargin = 8;
+const double _kEdgeMargin = 12;
 const double _kPanelWidth = 200;
 const double _kDragTapSlop = 8;
 const Duration _kLongPressHide = Duration(milliseconds: 450);
@@ -84,6 +84,11 @@ class SwayOverlay extends StatefulWidget {
 
   @override
   State<SwayOverlay> createState() => _SwayOverlayState();
+
+  /// Forgets the remembered bubble position (tests only).
+  @visibleForTesting
+  static void clearPersistedPositionForTest() =>
+      _persistedBubblePosition = null;
 }
 
 class _SwayOverlayState extends State<SwayOverlay> {
@@ -200,32 +205,47 @@ class _SwayOverlayState extends State<SwayOverlay> {
         );
         return;
       }
-      _ensurePosition(MediaQuery.sizeOf(context));
+      _ensurePosition(MediaQuery.of(context));
       _buttonEntry = OverlayEntry(builder: _buildButton);
       overlay.insert(_buttonEntry!);
     });
   }
 
-  void _ensurePosition(Size screen) {
-    if (_position != null) return;
-    final saved = _persistedBubblePosition;
-    if (saved != null) {
-      _position = Offset(
-        saved.dx.clamp(0.0, screen.width - _kBubbleSize),
-        saved.dy.clamp(0.0, screen.height - _kBubbleSize),
-      );
-      return;
-    }
-    _position = Offset(
-      screen.width - _kBubbleSize - _kEdgeMargin,
-      _defaultLowerMidTop(screen),
+  /// Top-left bounds: [_kEdgeMargin] from every edge, inside the safe area
+  /// (status bar, navigation bar, notches) — same rule as Mole and Ferret.
+  Rect _bounds(MediaQueryData media) {
+    final pad = media.padding;
+    return Rect.fromLTRB(
+      pad.left + _kEdgeMargin,
+      pad.top + _kEdgeMargin,
+      media.size.width - pad.right - _kBubbleSize - _kEdgeMargin,
+      media.size.height - pad.bottom - _kBubbleSize - _kEdgeMargin,
     );
   }
 
-  double _defaultLowerMidTop(Size screen) {
-    final center = (screen.height - _kBubbleSize) / 2;
-    final bottom = screen.height - _kBubbleSize - _kEdgeMargin;
-    return center + (bottom - center) * _kDefaultLowerBand;
+  Offset _clampToBounds(Offset offset, MediaQueryData media) {
+    final b = _bounds(media);
+    return Offset(
+      offset.dx.clamp(b.left, b.right),
+      offset.dy.clamp(b.top, b.bottom),
+    );
+  }
+
+  void _ensurePosition(MediaQueryData media) {
+    // The first frame can report a 0×0 screen; a default computed from it
+    // would pin the bubble top-left forever. Wait for a real size.
+    if (_position != null || media.size.isEmpty) return;
+    final saved = _persistedBubblePosition;
+    if (saved != null) {
+      _position = _clampToBounds(saved, media);
+      return;
+    }
+    final b = _bounds(media);
+    final center = (b.top + b.bottom) / 2;
+    _position = Offset(
+      b.right,
+      center + (b.bottom - center) * _kDefaultLowerBand,
+    );
   }
 
   void _persistPosition() {
@@ -283,23 +303,15 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    final screen = MediaQuery.sizeOf(context);
-    _ensurePosition(screen);
+    final media = MediaQuery.of(context);
+    _ensurePosition(media);
+    if (_position == null) return;
     _dragDistance += details.delta.distance;
     if (_dragDistance >= _kDragTapSlop) {
       _longPressTimer?.cancel();
       _longPressTimer = null;
     }
-    _position = Offset(
-      (_position!.dx + details.delta.dx).clamp(
-        0.0,
-        screen.width - _kBubbleSize,
-      ),
-      (_position!.dy + details.delta.dy).clamp(
-        0.0,
-        screen.height - _kBubbleSize,
-      ),
-    );
+    _position = _clampToBounds(_position! + details.delta, media);
     _markOverlayDirty();
   }
 
@@ -308,16 +320,14 @@ class _SwayOverlayState extends State<SwayOverlay> {
     _longPressTimer = null;
     if (!mounted || _userHidden || !_active) return;
 
-    final screen = MediaQuery.sizeOf(context);
-    _ensurePosition(screen);
-    final midX = screen.width / 2;
-    final snapLeft = _position!.dx + _kBubbleSize / 2 < midX;
-    _position = Offset(
-      snapLeft ? _kEdgeMargin : screen.width - _kBubbleSize - _kEdgeMargin,
-      _position!.dy.clamp(
-        _kEdgeMargin,
-        screen.height - _kBubbleSize - _kEdgeMargin,
-      ),
+    final media = MediaQuery.of(context);
+    _ensurePosition(media);
+    if (_position == null) return;
+    final b = _bounds(media);
+    final snapLeft = _position!.dx + _kBubbleSize / 2 < media.size.width / 2;
+    _position = _clampToBounds(
+      Offset(snapLeft ? b.left : b.right, _position!.dy),
+      media,
     );
     _persistPosition();
     _markOverlayDirty();
@@ -328,16 +338,18 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   Widget _buildButton(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    _ensurePosition(screen);
+    final media = MediaQuery.of(context);
+    _ensurePosition(media);
+    if (_position == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final locale = _controller?.currentLocale;
     final code = (locale?.languageCode ?? '?').toUpperCase();
     final bubble = _buildBubble(theme, code, _activation.showReleaseWarning);
+    final at = _clampToBounds(_position!, media);
 
     return Positioned(
-      left: _position!.dx.clamp(0.0, screen.width - _kBubbleSize),
-      top: _position!.dy.clamp(0.0, screen.height - _kBubbleSize),
+      left: at.dx,
+      top: at.dy,
       child: _activation.showReleaseWarning
           ? Semantics(label: 'Sway active in release build', child: bubble)
           : bubble,

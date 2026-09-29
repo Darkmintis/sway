@@ -70,6 +70,71 @@ void main() {
     expect(after.dy, isNot(closeTo(before.dy, 1)));
   });
 
+  testWidgets('keeps 12px clear of status bar and navigation bar', (
+    tester,
+  ) async {
+    SwayOverlay.clearPersistedPositionForTest();
+    addTearDown(SwayOverlay.clearPersistedPositionForTest);
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.padding = const FakeViewPadding(top: 40, bottom: 30);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SwayOverlay(
+          adapter: SwayFormatAdapter(
+            supportedLocales: const [Locale('en'), Locale('ar')],
+            currentLocale: const Locale('en'),
+            onLocaleChange: (_) {},
+          ),
+          child: const Scaffold(body: SizedBox.expand()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final button = find.byIcon(Icons.translate_rounded);
+    expect(tester.getCenter(button).dx, closeTo(400 - 12 - 24, 1));
+
+    await tester.drag(button, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(button).dy, closeTo(40 + 12 + 24, 1));
+
+    await tester.drag(button, const Offset(0, 4000));
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(button).dy, closeTo(800 - 30 - 12 - 24, 1));
+  });
+
+  testWidgets('0×0 first frame does not pin the bubble top-left', (
+    tester,
+  ) async {
+    SwayOverlay.clearPersistedPositionForTest();
+    tester.view.physicalSize = Size.zero;
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final adapter = SwayFormatAdapter(
+      supportedLocales: const [Locale('en'), Locale('ar')],
+      currentLocale: const Locale('en'),
+      onLocaleChange: (_) {},
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SwayOverlay(
+          adapter: adapter,
+          child: const Scaffold(body: SizedBox.expand()),
+        ),
+      ),
+    );
+    await tester.pump();
+    tester.view.physicalSize = const Size(400, 800);
+    await tester.pumpAndSettle();
+
+    final center = tester.getCenter(find.byIcon(Icons.translate_rounded));
+    expect(center.dx, greaterThan(300)); // right side
+    expect(center.dy, greaterThan(400)); // lower half
+  });
+
   testWidgets('ForceRebuildScope remounts on forceRtl', (tester) async {
     var builds = 0;
     await tester.pumpWidget(
