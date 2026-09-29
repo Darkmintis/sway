@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-09-29
+
+### Changed
+
+- Release builds (`enableInRelease: true`) mark the bubble with a red ring
+  instead of the `SWAY ACTIVE` text tag, plus a
+  "Sway active in release build" screen-reader label. The locale badge
+  (EN, AR, …) is drawn above the ring so it stays readable.
+- Bubble keeps a 12px gap from every edge inside the safe area (status bar,
+  navigation bar, notches). Dragging is
+  limited to that area too.
+- Example app enables Sway in release builds to show the red ring.
+
+### Fixed
+
+- Bubble sometimes started in the top-left corner when the first frame
+  reported a 0×0 screen; it now waits for the real size.
+
 ## [0.3.0] - 2026-09-28
 
 ### Added
