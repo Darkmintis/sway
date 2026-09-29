@@ -59,6 +59,8 @@ class ExampleAppState extends State<ExampleApp> {
         translations: translations,
         child: Sway.debugOverlay(
           adapter: adapter,
+          // Demo only: shows the red release border. Keep `false` in real apps.
+          enableInRelease: true,
           child: child ?? const SizedBox.shrink(),
         ),
       ),
