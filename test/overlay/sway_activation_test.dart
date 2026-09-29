@@ -92,6 +92,15 @@ void main() {
       expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
       expect(_redBorder, findsOneWidget);
       expect(find.text('SWAY ACTIVE'), findsNothing);
+
+      // Badge is painted after (above) the bordered circle, not inside it.
+      final badge = find.byKey(const ValueKey('sway-locale-badge'));
+      expect(badge, findsOneWidget);
+      expect(
+        find.descendant(of: _redBorder, matching: badge),
+        findsNothing,
+      );
+      expect(find.text('EN'), findsOneWidget);
     });
   });
 

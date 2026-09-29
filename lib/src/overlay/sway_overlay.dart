@@ -357,58 +357,62 @@ class _SwayOverlayState extends State<SwayOverlay> {
   }
 
   Widget _buildBubble(ThemeData theme, String code, bool releaseBorder) {
-    return Material(
-      elevation: 6,
-      shadowColor: Colors.black54,
-      shape: CircleBorder(
-        side: releaseBorder
-            ? const BorderSide(color: Color(0xFFB3261E), width: 3)
-            : BorderSide.none,
-      ),
-      color: theme.colorScheme.primary,
-      child: SizedBox(
-        width: _kBubbleSize,
-        height: _kBubbleSize,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onPanStart: _onPanStart,
-          onPanUpdate: _onPanUpdate,
-          onPanEnd: _onPanEnd,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(
-                Icons.translate_rounded,
-                size: 22,
-                color: theme.colorScheme.onPrimary,
-              ),
-              Positioned(
-                right: 4,
-                bottom: 4,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 3,
-                    vertical: 1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onPrimary,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    code.length > 2 ? code.substring(0, 2) : code,
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+    // The locale badge sits outside the Material so the release border
+    // (painted on the Material's foreground) never covers it.
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Material(
+          elevation: 6,
+          shadowColor: Colors.black54,
+          shape: CircleBorder(
+            side: releaseBorder
+                ? const BorderSide(color: Color(0xFFB3261E), width: 3)
+                : BorderSide.none,
+          ),
+          color: theme.colorScheme.primary,
+          child: SizedBox(
+            width: _kBubbleSize,
+            height: _kBubbleSize,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanStart: _onPanStart,
+              onPanUpdate: _onPanUpdate,
+              onPanEnd: _onPanEnd,
+              child: Center(
+                child: Icon(
+                  Icons.translate_rounded,
+                  size: 22,
+                  color: theme.colorScheme.onPrimary,
                 ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        Positioned(
+          right: 4,
+          bottom: 4,
+          child: IgnorePointer(
+            child: Container(
+              key: const ValueKey('sway-locale-badge'),
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onPrimary,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                code.length > 2 ? code.substring(0, 2) : code,
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
