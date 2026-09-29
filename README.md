@@ -146,7 +146,7 @@ On in debug and profile, off in release. Same switches as Mole and Ferret:
 | Flag | Effect |
 |------|--------|
 | `enabled: false` | Off in every build |
-| `enableInRelease: true` | Also on in release, with a red `SWAY ACTIVE` tag and a console banner |
+| `enableInRelease: true` | Also on in release, with a red border around the bubble and a console banner |
 | `debugOnly: true` | Debug builds only (hides in profile) |
 
 Minimal StatefulWidget + `home:` tutorial and more recipes: [doc/OVERLAY_ONLY.md](doc/OVERLAY_ONLY.md)

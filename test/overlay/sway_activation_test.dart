@@ -85,14 +85,17 @@ void main() {
       expect(find.byIcon(Icons.translate_rounded), findsNothing);
     });
 
-    testWidgets('enableInRelease shows bubble with red tag', (tester) async {
+    testWidgets('enableInRelease shows bubble with red border', (
+      tester,
+    ) async {
       await pump(tester, optIn: true);
       expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
-      expect(find.text('SWAY ACTIVE'), findsOneWidget);
+      expect(_redBorder, findsOneWidget);
+      expect(find.text('SWAY ACTIVE'), findsNothing);
     });
   });
 
-  testWidgets('no release tag in debug builds', (tester) async {
+  testWidgets('no release border in debug builds', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SwayOverlay(
@@ -108,6 +111,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
-    expect(find.text('SWAY ACTIVE'), findsNothing);
+    expect(_redBorder, findsNothing);
   });
 }
+
+final _redBorder = find.byWidgetPredicate(
+  (w) =>
+      w is Material &&
+      w.shape is CircleBorder &&
+      (w.shape! as CircleBorder).side.color == const Color(0xFFB3261E),
+);

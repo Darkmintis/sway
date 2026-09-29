@@ -32,7 +32,7 @@ Offset? _persistedBubblePosition;
 /// Includes Force RTL / Force LTR preview toggles.
 ///
 /// Active in debug and profile by default. Off in release builds unless
-/// [enableInRelease] is `true`, in which case a red `SWAY ACTIVE` tag and a
+/// [enableInRelease] is `true`, in which case a red border on the bubble and a
 /// console banner make it obvious. [enabled] is the master switch.
 /// Pass [debugOnly] to also hide the bubble in profile builds.
 class SwayOverlay extends StatefulWidget {
@@ -50,7 +50,7 @@ class SwayOverlay extends StatefulWidget {
   /// Master switch. `false` renders no button in any build mode.
   final bool enabled;
 
-  /// Opt in to release builds. Shows a red `SWAY ACTIVE` tag and prints a
+  /// Opt in to release builds. Draws a red border around the bubble and prints a
   /// console banner so it can't ship to users by accident.
   final bool enableInRelease;
 
@@ -333,33 +333,26 @@ class _SwayOverlayState extends State<SwayOverlay> {
     final theme = Theme.of(context);
     final locale = _controller?.currentLocale;
     final code = (locale?.languageCode ?? '?').toUpperCase();
-    final left = _position!.dx.clamp(0.0, screen.width - _kBubbleSize);
-    final onLeftHalf = left + _kBubbleSize / 2 < screen.width / 2;
+    final bubble = _buildBubble(theme, code, _activation.showReleaseWarning);
 
     return Positioned(
-      left: left,
+      left: _position!.dx.clamp(0.0, screen.width - _kBubbleSize),
       top: _position!.dy.clamp(0.0, screen.height - _kBubbleSize),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          _buildBubble(theme, code),
-          if (_activation.showReleaseWarning)
-            Positioned(
-              bottom: _kBubbleSize + 6,
-              left: onLeftHalf ? 0 : null,
-              right: onLeftHalf ? null : 0,
-              child: const _ReleaseTag(),
-            ),
-        ],
-      ),
+      child: _activation.showReleaseWarning
+          ? Semantics(label: 'Sway active in release build', child: bubble)
+          : bubble,
     );
   }
 
-  Widget _buildBubble(ThemeData theme, String code) {
+  Widget _buildBubble(ThemeData theme, String code, bool releaseBorder) {
     return Material(
       elevation: 6,
       shadowColor: Colors.black54,
-      shape: const CircleBorder(),
+      shape: CircleBorder(
+        side: releaseBorder
+            ? const BorderSide(color: Color(0xFFB3261E), width: 3)
+            : BorderSide.none,
+      ),
       color: theme.colorScheme.primary,
       child: SizedBox(
         width: _kBubbleSize,
@@ -576,32 +569,6 @@ class _SwayOverlayState extends State<SwayOverlay> {
       forceRtl: _controller!.forceRtl,
       forceLtr: _controller!.forceLtr,
       child: widget.child,
-    );
-  }
-}
-
-class _ReleaseTag extends StatelessWidget {
-  const _ReleaseTag();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFFB3261E),
-      borderRadius: BorderRadius.circular(6),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(
-          'SWAY ACTIVE',
-          maxLines: 1,
-          softWrap: false,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.4,
-          ),
-        ),
-      ),
     );
   }
 }

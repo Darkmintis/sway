@@ -33,7 +33,7 @@ class Sway {
   /// [ListenableLocaleAdapter] from the get/set/listenable args.
   ///
   /// [enabled] is the master switch. Release builds stay off unless
-  /// [enableInRelease] is `true` (red `SWAY ACTIVE` tag + console banner).
+  /// [enableInRelease] is `true` (red bubble border + console banner).
   static Widget debugOverlay({
     Key? key,
     required Widget child,

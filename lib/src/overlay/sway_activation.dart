@@ -14,7 +14,7 @@ class SwayActivation {
   final bool active;
 
   /// `true` only when Sway is active in a release build: print the console
-  /// banner and show the red on-screen tag.
+  /// banner and draw the red bubble border.
   final bool showReleaseWarning;
 
   /// Forces release-mode resolution in tests (`null` uses [kReleaseMode]).

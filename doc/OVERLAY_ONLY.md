@@ -135,7 +135,7 @@ class _MyAppState extends State<MyApp> {
 |------|---------|
 | default | Show in debug + profile, off in release |
 | `enabled: false` | Master switch off: no bubble in any build |
-| `enableInRelease: true` | Also show in release, with a red `SWAY ACTIVE` tag and a console banner |
+| `enableInRelease: true` | Also show in release, with a red border around the bubble and a console banner |
 | `debugOnly: true` | Show only in debug (`kDebugMode`) |
 
 `enabled` / `enableInRelease` match Mole and Ferret, so one app flag can drive all three. `disabled: true` still works but is deprecated in favor of `enabled: false`.
@@ -158,7 +158,7 @@ Bubble edge position is remembered across hot reload in-process (not across a fu
 | No bubble under `builder` | Use `Sway.debugOverlay`, not bare `SwayOverlay` (needs nested Overlay) |
 | Badge stale after Settings change | Share one listenable owner via `Sway.debugOverlay` / `ListenableLocaleAdapter` |
 | Bubble in profile builds | Pass `debugOnly: true` |
-| No bubble in a release / QA build | Pass `enableInRelease: true` (shows a red `SWAY ACTIVE` tag) |
+| No bubble in a release / QA build | Pass `enableInRelease: true` (the bubble gets a red border) |
 | "Sway broke my strings" | Remount does not fix `static final` baked translations or forced `textDirection` - fix those in app code |
 
 ## easy_localization / slang
